@@ -5,10 +5,10 @@
     "3": "Table sports"
   },
   "games": [
-    { "name": "Ludo & Snakes", "description": "Classic Ludo and Snakes & Ladders in one board game suite.", "category": 1, "order": 1, "folder": "ludo", "image": "", "visibility": "public" },
-    { "name": "Bead 16", "description": "Sholo Guti: a traditional strategy game with chain captures.", "category": 2, "order": 1, "folder": "bead-16", "image": "", "visibility": "public" },
-    { "name": "Tic Tac Toe", "description": "Line up three marks first. Play a friend or the computer.", "category": 2, "order": 2, "folder": "tic-tac-toe", "image": "", "visibility": "public" },
-    { "name": "Carrom Pool", "description": "Flick the striker and pocket coins, with the red queen worth 50.", "category": 3, "order": 1, "folder": "carrom", "image": "", "visibility": "public" },
-    { "name": "8-Ball Pool", "description": "Pocket your solids or stripes, then sink the 8-ball last.", "category": 3, "order": 2, "folder": "8-ball-pool", "image": "", "visibility": "public" }
+    { "name": "Ludo & Snakes", "description": "Classic Ludo and Snakes & Ladders in one board game suite.", "category": 1, "order": 1, "folder": "ludo", "image": "https://t3.ftcdn.net/jpg/04/94/28/28/360_F_494282874_nETixePHNEutZcAmpw1qT3eRns1IJPks.webp", "visibility": "public" },
+    { "name": "Bead 16", "description": "Sholo Guti: a traditional strategy game with chain captures.", "category": 2, "order": 1, "folder": "bead-16", "image": "https://s.cafebazaar.ir/images/icons/com.mggames.sixteenbeads-f9d42527-e4bc-441d-91bb-d0dd4c208122_512x512.png?x-img=v1/resize,h_128,w_128,lossless_false/optimize", "visibility": "public" },
+    { "name": "Tic Tac Toe", "description": "Line up three marks first. Play a friend or the computer.", "category": 2, "order": 2, "folder": "tic-tac-toe", "image": "https://t3.ftcdn.net/jpg/04/76/68/98/360_F_476689855_vnP3cVjmb8HDoL9NLY4UBeEvuMAWT3qK.webp", "visibility": "public" },
+    { "name": "Carrom Pool", "description": "Flick the striker and pocket coins, with the red queen worth 50.", "category": 3, "order": 1, "folder": "carrom", "image": "https://images.sftcdn.net/images/t_app-icon-m/p/d22fae13-1bdf-4b4d-966b-8801b73ae2f8/2325440300/carrom-meta-board-disc-game-icon.webp", "visibility": "public" },
+    { "name": "8-Ball Pool", "description": "Pocket your solids or stripes, then sink the 8-ball last.", "category": 3, "order": 2, "folder": "8-ball-pool", "image": "https://cdn.jim-nielsen.com/.netlify/images?url=/icongallery/ios/8-ball-pool-2021-08-05/1024.png&w=1024", "visibility": "public" }
   ]
 }
