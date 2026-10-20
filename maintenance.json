@@ -1,6 +1,6 @@
 {
   "maintenance": "off",
   "message": "GameyFi is currently undergoing maintenance. Please come back soon.",
-  "countdownEnabled": false,
-  "countdownEnd": ""
+  "countdownEnabled": true,
+  "countdownEnd": "2026-12-31T23:59:59Z"
 }
