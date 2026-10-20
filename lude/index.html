@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Ludo & Snakes — Minimal 2D Offline Board Game Suite</title>
+  <meta name="description" content="Play Classic Ludo and Snakes & Ladders offline! A clean, modern 2D board game suite with smooth token animations, smart offline AI, and 2-4 player pass-and-play." />
+  <meta name="keywords" content="Ludo game, Snakes and Ladders, offline 2D board game, minimalist board game, HTML5 Ludo" />
+  <meta property="og:title" content="Ludo & Snakes — Minimal 2D Offline Board Game Suite" />
+  <meta property="og:description" content="Smooth 2D Ludo and Snakes & Ladders with local multiplayer and smart offline AI." />
+  <meta property="og:type" content="website" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0f1115;
+      font-family: 'Inter', sans-serif;
+      color: #f3f4f6;
+      touch-action: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-modal {
+      animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes diceShake {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      20% { transform: rotate(-14deg) scale(1.08); }
+      40% { transform: rotate(14deg) scale(1.1); }
+      60% { transform: rotate(-10deg) scale(1.08); }
+      80% { transform: rotate(10deg) scale(1.04); }
+    }
+    .dice-rolling {
+      animation: diceShake 0.36s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-between h-full w-full relative">
+
+  <!-- ==================== MAIN MENU OVERLAY ==================== -->
+  <div id="mainMenu" class="fixed inset-0 z-40 flex items-center justify-center bg-[#0f1115] p-4 overflow-y-auto">
+    <div class="w-full max-w-md bg-[#181b22] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col gap-4 animate-modal my-auto">
+      
+      <!-- Top Bar: Badge & Audio Toggle -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Offline 2D Board Suite
+        </div>
+        <button id="menuSoundBtn" onclick="toggleSound()" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Toggle Sound">
+          <svg id="menuSoundIconOn" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
+          <svg id="menuSoundIconOff" class="w-5 h-5 hidden text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mini Board Logo & Title -->
+      <div class="text-center flex flex-col items-center gap-1.5">
+        <div class="w-14 h-14 rounded-2xl bg-[#111827] border-4 border-white/15 shadow-inner grid grid-cols-2 gap-1 p-1.5 relative">
+          <div class="rounded-md bg-emerald-500/90 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-white"></div></div>
+          <div class="rounded-md bg-amber-500/90 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-white"></div></div>
+          <div class="rounded-md bg-rose-500/90 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-white"></div></div>
+          <div class="rounded-md bg-sky-500/90 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-white"></div></div>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white mt-0.5">
+          LUDO <span class="text-amber-500">&amp; SNAKES</span>
+        </h1>
+        <p id="menuSubtitle" class="text-xs text-gray-400">Classic 4-Token Tactical Race &bull; Safe Stars &amp; Captures</p>
+      </div>
+
+      <!-- Game Type Selection (Ludo vs Snake & Ladder) -->
+      <div class="flex flex-col gap-1.5">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 px-1">Select Game</span>
+        <div class="grid grid-cols-2 gap-3">
+          <button id="gameLudoBtn" onclick="selectGameType('ludo')" class="p-3 rounded-2xl border-2 border-amber-500 bg-amber-500/10 flex flex-col items-center gap-1 transition">
+            <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+            </svg>
+            <span class="text-sm font-bold text-white">Classic Ludo</span>
+            <span class="text-[10px] text-gray-400">4 Tokens &bull; Safe Stars</span>
+          </button>
+
+          <button id="gameSnakesBtn" onclick="selectGameType('snakes')" class="p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1 transition">
+            <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+            <span class="text-sm font-bold text-white">Snake &amp; Ladder</span>
+            <span class="text-[10px] text-gray-400">100 Tiles &bull; Climb &amp; Slide</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode Selection (Pass & Play vs Computer AI) -->
+      <div class="grid grid-cols-2 gap-3">
+        <button id="modeFriendBtn" onclick="selectMode('friend')" class="p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 flex flex-col items-center gap-1 transition">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span class="text-xs font-bold text-white">Play with Friends</span>
+          <span class="text-[10px] text-gray-400">Local Pass &amp; Play</span>
+        </button>
+
+        <button id="modeAiBtn" onclick="selectMode('ai')" class="p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1 transition">
+          <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span class="text-xs font-bold text-white">vs Computer</span>
+          <span class="text-[10px] text-gray-400">Smart Offline AI</span>
+        </button>
+      </div>
+
+      <!-- Player Count Selector -->
+      <div class="flex flex-col gap-1.5 bg-white/5 p-3 rounded-2xl border border-white/10">
+        <div class="flex items-center justify-between text-xs text-gray-400 font-semibold px-1">
+          <span>TOTAL PLAYERS</span>
+          <span id="playerCountLabel" class="text-amber-400">2 Players (1v1)</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="selectPlayerCount(2)" id="pCount2" class="py-1.5 rounded-xl text-xs font-bold border border-amber-500 bg-amber-500/20 text-white transition">2 Players</button>
+          <button onclick="selectPlayerCount(3)" id="pCount3" class="py-1.5 rounded-xl text-xs font-bold border border-white/10 bg-white/5 text-gray-300 transition">3 Players</button>
+          <button onclick="selectPlayerCount(4)" id="pCount4" class="py-1.5 rounded-xl text-xs font-bold border border-white/10 bg-white/5 text-gray-300 transition">4 Players</button>
+        </div>
+      </div>
+
+      <!-- Board Theme Selector -->
+      <div class="flex items-center justify-between bg-white/5 px-4 py-2.5 rounded-2xl border border-white/10">
+        <div class="flex flex-col">
+          <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Board Theme</span>
+          <span id="themeNameLabel" class="text-xs text-gray-200 font-medium mt-0.5">Classic Birch</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <button onclick="selectTheme('birch')" id="themeBtn_birch" class="w-7 h-7 rounded-full bg-[#f5ead8] border-2 border-white ring-2 ring-amber-500 transition transform scale-110" title="Classic Birch"></button>
+          <button onclick="selectTheme('slate')" id="themeBtn_slate" class="w-7 h-7 rounded-full bg-[#1e293b] border-2 border-slate-400 transition opacity-70 hover:opacity-100" title="Midnight Slate"></button>
+          <button onclick="selectTheme('emerald')" id="themeBtn_emerald" class="w-7 h-7 rounded-full bg-[#14532d] border-2 border-emerald-400 transition opacity-70 hover:opacity-100" title="Tournament Emerald"></button>
+          <button onclick="selectTheme('ocean')" id="themeBtn_ocean" class="w-7 h-7 rounded-full bg-[#164e63] border-2 border-cyan-400 transition opacity-70 hover:opacity-100" title="Ocean Minimal"></button>
+        </div>
+      </div>
+
+      <!-- Start Game CTA -->
+      <button onclick="startNewMatch()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 active:scale-[0.99] text-white font-extrabold text-base tracking-wide shadow-lg shadow-orange-600/25 transition">
+        START MATCH
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ==================== GAMEPLAY HUD & BOARD ==================== -->
+  <div id="gameContainer" class="w-full h-full max-w-xl mx-auto flex flex-col justify-between p-2.5 sm:p-4 select-none">
+    
+    <!-- Top HUD Bar -->
+    <div class="w-full flex flex-col gap-2 bg-[#181b22] border border-white/10 rounded-2xl p-2.5 shadow-lg">
+      
+      <!-- Top Row: Game Title Pill, Status & Utility Buttons -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-2 px-1">
+        <div class="flex items-center gap-2">
+          <span id="hudGameBadge" class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">LUDO</span>
+          <span id="statusBanner" class="text-xs font-bold text-white tracking-wide truncate max-w-[175px] sm:max-w-[240px]">Red's Turn — Roll Dice</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <button onclick="switchGameQuick()" class="px-2.5 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center gap-1 text-[11px] font-semibold text-gray-300 transition" title="Switch Ludo / Snakes & Ladders">
+            <svg class="w-3.5 h-3.5 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+            </svg>
+            <span id="quickSwitchLabel">Snakes</span>
+          </button>
+          <button onclick="cycleThemeInGame()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Change Board Theme">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+          </button>
+          <button onclick="toggleSound()" id="hudSoundBtn" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Mute / Unmute">
+            <svg id="hudSoundOn" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>
+            <svg id="hudSoundOff" class="w-3.5 h-3.5 hidden text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+            </svg>
+          </button>
+          <button onclick="openMainMenu()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Main Menu">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Player Score/Progress Cards Grid -->
+      <div id="playerCardsContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+    </div>
+
+    <!-- Rules / Legend Mini Bar -->
+    <div id="rulesMiniBar" class="flex items-center justify-center gap-4 text-[11px] text-gray-400 py-0.5">
+      <span>★ Safe Spot</span>
+      <span>&bull;</span>
+      <span>Roll <strong class="text-white">6</strong> to Unlock &amp; Bonus Roll</span>
+      <span>&bull;</span>
+      <span>Capture = Bonus Roll</span>
+    </div>
+
+    <!-- Center Board Wrapper -->
+    <div id="boardWrapper" class="flex-1 w-full flex items-center justify-center overflow-hidden my-1">
+      <div class="relative aspect-square max-h-full max-w-full flex items-center justify-center shadow-2xl rounded-3xl">
+        <canvas id="boardCanvas" width="700" height="700" class="w-full h-full rounded-3xl touch-none cursor-pointer"></canvas>
+      </div>
+    </div>
+
+    <!-- Bottom Dice & Token Control Bar -->
+    <div class="w-full bg-[#181b22] border border-white/10 rounded-2xl px-4 py-2.5 shadow-lg flex items-center justify-between gap-3">
+      
+      <!-- Left: Active Player Indicator & Prompt -->
+      <div class="flex flex-col min-w-0 flex-1">
+        <div class="flex items-center gap-2">
+          <span id="activeTurnDot" class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+          <span id="activeTurnTitle" class="text-xs font-extrabold uppercase tracking-wider text-white truncate">Red's Turn</span>
+        </div>
+        <span id="controlHintText" class="text-[11px] text-sky-400 font-medium truncate mt-0.5">Tap the dice or press Space to roll</span>
+        
+        <!-- Quick Token Select Buttons (Shown when multiple Ludo tokens are movable) -->
+        <div id="tokenQuickBar" class="hidden items-center gap-1.5 mt-1.5"></div>
+      </div>
+
+      <!-- Right: Interactive 2D/3D Dice Widget -->
+      <div class="flex items-center gap-3">
+        <div id="lastRollBadge" class="text-right hidden sm:flex flex-col">
+          <span class="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Rolled</span>
+          <span id="rolledValueText" class="text-lg font-extrabold text-amber-400 leading-none">—</span>
+        </div>
+
+        <button
+          id="diceBtn"
+          onclick="handleDiceClick()"
+          class="w-14 h-14 rounded-2xl bg-gradient-to-br from-white to-slate-200 border-2 border-white shadow-lg shadow-black/50 flex items-center justify-center active:scale-95 transition relative"
+          title="Roll Dice (Space)"
+        >
+          <canvas id="diceCanvas" width="56" height="56" class="w-12 h-12"></canvas>
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ==================== GAME OVER MODAL ==================== -->
+  <div id="gameOverModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="w-full max-w-sm bg-[#181b22] border border-white/15 rounded-3xl p-6 text-center shadow-2xl flex flex-col gap-5 animate-modal">
+      <div class="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 mx-auto flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+      </div>
+
+      <div>
+        <p class="text-xs font-bold uppercase tracking-widest text-amber-400">Match Complete</p>
+        <h2 id="winnerTitle" class="text-2xl font-extrabold text-white mt-1">Player 1 Wins!</h2>
+        <p id="winnerSubtitle" class="text-xs text-gray-400 mt-1">Victory achieved!</p>
+      </div>
+
+      <div id="finalStandingsBox" class="flex flex-col gap-2 bg-white/5 p-3.5 rounded-2xl border border-white/10 text-left"></div>
+
+      <div class="flex gap-3">
+        <button onclick="openMainMenu()" class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-bold text-sm transition">
+          Main Menu
+        </button>
+        <button onclick="startNewMatch()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold text-sm shadow-lg shadow-orange-600/25 transition">
+          Play Again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== GAME SCRIPT ==================== -->
+  <script>
+    /**************************************************************
+     * 1. SOUND SYNTHESIZER (Web Audio API - 100% Offline)
+     **************************************************************/
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('menuSoundIconOn').classList.toggle('hidden', !soundEnabled);
+      document.getElementById('menuSoundIconOff').classList.toggle('hidden', soundEnabled);
+      document.getElementById('hudSoundOn').classList.toggle('hidden', !soundEnabled);
+      document.getElementById('hudSoundOff').classList.toggle('hidden', soundEnabled);
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+
+      if (type === 'dice') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(260 + Math.random() * 180, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.055);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      } else if (type === 'step') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(420, now);
+        osc.frequency.exponentialRampToValueAtTime(640, now + 0.06);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.07);
+      } else if (type === 'unlock' || type === 'ladder') {
+        const notes = [440, 554.37, 659.25];
+        notes.forEach((f, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, now + i * 0.055);
+          gain.gain.setValueAtTime(0.22, now + i * 0.055);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.055 + 0.16);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + i * 0.055);
+          osc.stop(now + i * 0.055 + 0.17);
+        });
+      } else if (type === 'capture' || type === 'snake') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(340, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.32);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.34);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      } else if (type === 'home' || type === 'win') {
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+          gain.gain.setValueAtTime(0.25, now + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.32);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.08);
+          osc.stop(now + idx * 0.08 + 0.34);
+        });
+      }
+    }
+
+    /**************************************************************
+     * 2. THEMES & PLAYER PALETTES
+     **************************************************************/
+    const THEMES = {
+      birch: {
+        name: 'Classic Birch',
+        frameOuter: '#2b1b12',
+        frameInner: '#472e1f',
+        surface: '#f5ead8',
+        surfaceAlt: '#ead7ba',
+        gridStroke: 'rgba(92, 58, 33, 0.25)',
+        textColor: '#3f2717'
+      },
+      slate: {
+        name: 'Midnight Slate',
+        frameOuter: '#090d16',
+        frameInner: '#1e293b',
+        surface: '#111827',
+        surfaceAlt: '#1e293b',
+        gridStroke: 'rgba(255, 255, 255, 0.12)',
+        textColor: '#cbd5e1'
+      },
+      emerald: {
+        name: 'Tournament Emerald',
+        frameOuter: '#0c1f14',
+        frameInner: '#163826',
+        surface: '#0f3f28',
+        surfaceAlt: '#165336',
+        gridStroke: 'rgba(255, 255, 255, 0.14)',
+        textColor: '#d1fae5'
+      },
+      ocean: {
+        name: 'Ocean Minimal',
+        frameOuter: '#091521',
+        frameInner: '#132a40',
+        surface: '#113c4f',
+        surfaceAlt: '#164e63',
+        gridStroke: 'rgba(255, 255, 255, 0.14)',
+        textColor: '#cffafe'
+      }
+    };
+
+    const THEME_KEYS = Object.keys(THEMES);
+    let currentThemeKey = 'birch';
+
+    // 4 Standard Slots (Clockwise: Red Bottom-Left, Green Top-Left, Yellow Top-Right, Blue Bottom-Right)
+    const PLAYER_DEFS = [
+      { id: 0, name: 'Red',    hex: '#f43f5e', light: '#fda4af', dark: '#9f1239', badgeBg: 'bg-rose-500/15',    border: 'border-rose-500',    text: 'text-rose-400',    dot: 'bg-rose-400' },
+      { id: 1, name: 'Green',  hex: '#10b981', light: '#6ee7b7', dark: '#065f46', badgeBg: 'bg-emerald-500/15', border: 'border-emerald-500', text: 'text-emerald-400', dot: 'bg-emerald-400' },
+      { id: 2, name: 'Yellow', hex: '#f59e0b', light: '#fcd34d', dark: '#92400e', badgeBg: 'bg-amber-500/15',   border: 'border-amber-500',   text: 'text-amber-400',   dot: 'bg-amber-400' },
+      { id: 3, name: 'Blue',   hex: '#38bdf8', light: '#7dd3fc', dark: '#075985', badgeBg: 'bg-sky-500/15',     border: 'border-sky-500',     text: 'text-sky-400',     dot: 'bg-sky-400' }
+    ];
+
+    /**************************************************************
+     * 3. LUDO & SNAKES GEOMETRY TABLES (700x700 Canvas)
+     **************************************************************/
+    const SIZE = 700;
+    const FRAME_PAD = 25;
+    const BOARD_SIZE = SIZE - FRAME_PAD * 2; // 650
+    const LUDO_CELL = BOARD_SIZE / 15;       // 43.333px
+    const SNAKE_CELL = BOARD_SIZE / 10;      // 65px
+
+    // 52-step clockwise perimeter track for Ludo (Index 0 = Red Start at col 6, row 13)
+    const LUDO_MAIN_TRACK = [
+      // Red bottom-left going up (5)
+      [6,13], [6,12], [6,11], [6,10], [6,9],
+      // Left arm bottom row going left (6)
+      [5,8], [4,8], [3,8], [2,8], [1,8], [0,8],
+      // Left turn (1)
+      [0,7],
+      // Left arm top row going right (6) - [1,6] is Green Start (idx 13)
+      [0,6], [1,6], [2,6], [3,6], [4,6], [5,6],
+      // Top arm left col going up (6)
+      [6,5], [6,4], [6,3], [6,2], [6,1], [6,0],
+      // Top turn (1)
+      [7,0],
+      // Top arm right col going down (6) - [8,1] is Yellow Start (idx 26)
+      [8,0], [8,1], [8,2], [8,3], [8,4], [8,5],
+      // Right arm top row going right (6)
+      [9,6], [10,6], [11,6], [12,6], [13,6], [14,6],
+      // Right turn (1)
+      [14,7],
+      // Right arm bottom row going left (6) - [13,8] is Blue Start (idx 39)
+      [14,8], [13,8], [12,8], [11,8], [10,8], [9,8],
+      // Bottom arm right col going down (6)
+      [8,9], [8,10], [8,11], [8,12], [8,13], [8,14],
+      // Bottom turn (1) & corner before Red start (1)
+      [7,14], [6,14]
+    ];
+
+    const LUDO_START_INDEX = [0, 13, 26, 39];
+    const LUDO_SAFE_INDICES = new Set([0, 8, 13, 21, 26, 34, 39, 47]);
+
+    const LUDO_HOME_PATHS = [
+      [[7,13], [7,12], [7,11], [7,10], [7,9], [7, 8.15]], // Red
+      [[1,7],  [2,7],  [3,7],  [4,7],  [5,7], [6.15, 7]], // Green
+      [[7,1],  [7,2],  [7,3],  [7,4],  [7,5], [7, 5.85]], // Yellow
+      [[13,7], [12,7], [11,7], [10,7], [9,7], [7.85, 7]]  // Blue
+    ];
+
+    const LUDO_YARD_SPOTS = [
+      [[1.8, 10.8], [3.2, 10.8], [1.8, 12.2], [3.2, 12.2]], // Red (Bottom-Left)
+      [[1.8, 1.8],  [3.2, 1.8],  [1.8, 3.2],  [3.2, 3.2]],  // Green (Top-Left)
+      [[10.8, 1.8], [12.2, 1.8], [10.8, 3.2], [12.2, 3.2]], // Yellow (Top-Right)
+      [[10.8, 10.8],[12.2, 10.8],[10.8, 12.2],[12.2, 12.2]] // Blue (Bottom-Right)
+    ];
+
+    // Snakes & Ladders Board Data
+    const LADDERS = [
+      { from: 4,  to: 25 },
+      { from: 13, to: 46 },
+      { from: 33, to: 49 },
+      { from: 42, to: 63 },
+      { from: 50, to: 69 },
+      { from: 62, to: 81 },
+      { from: 74, to: 92 }
+    ];
+
+    const SNAKES = [
+      { from: 27, to: 5,  color: '#f43f5e' },
+      { from: 40, to: 3,  color: '#a855f7' },
+      { from: 43, to: 18, color: '#ec4899' },
+      { from: 54, to: 31, color: '#f97316' },
+      { from: 66, to: 45, color: '#eab308' },
+      { from: 89, to: 53, color: '#14b8a6' },
+      { from: 99, to: 41, color: '#ef4444' }
+    ];
+
+    /**************************************************************
+     * 4. STATE MANAGEMENT
+     **************************************************************/
+    const canvas = document.getElementById('boardCanvas');
+    const ctx = canvas.getContext('2d');
+    const diceCanvas = document.getElementById('diceCanvas');
+    const diceCtx = diceCanvas.getContext('2d');
+
+    let selectedGame = 'ludo'; // 'ludo' | 'snakes'
+    let gameMode = 'friend';   // 'friend' | 'ai'
+    let playerCount = 2;       // 2, 3, or 4
+
+    // Active player slots (in 2P mode we use diagonally opposite Red [0] & Yellow [2])
+    let activePlayers = [];
+    let currentTurnIdx = 0;
+    let diceValue = 1;
+    let turnPhase = 'WAIT_ROLL'; // 'WAIT_ROLL' | 'ROLLING' | 'WAIT_MOVE' | 'ANIMATING' | 'GAME_OVER'
+    let validTokenMoves = [];
+    let pulseTimer = 0;
+    let floatingTexts = [];
+    let aiTimer = null;
+
+    /**************************************************************
+     * 5. MENU & CONFIGURATION HANDLERS
+     **************************************************************/
+    function selectGameType(type) {
+      selectedGame = type;
+      const ludoBtn = document.getElementById('gameLudoBtn');
+      const snakesBtn = document.getElementById('gameSnakesBtn');
+      const subtitle = document.getElementById('menuSubtitle');
+
+      if (type === 'ludo') {
+        ludoBtn.className = 'p-3 rounded-2xl border-2 border-amber-500 bg-amber-500/10 flex flex-col items-center gap-1 transition';
+        snakesBtn.className = 'p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1 transition';
+        subtitle.innerHTML = 'Classic 4-Token Tactical Race &bull; Safe Stars &amp; Captures';
+      } else {
+        snakesBtn.className = 'p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 flex flex-col items-center gap-1 transition';
+        ludoBtn.className = 'p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1 transition';
+        subtitle.innerHTML = '100-Tile Climb &amp; Slide Adventure &bull; Ladders &amp; Bezier Snakes';
+      }
+    }
+
+    function selectMode(mode) {
+      gameMode = mode;
+      const friendBtn = document.getElementById('modeFriendBtn');
+      const aiBtn = document.getElementById('modeAiBtn');
+
+      if (mode === 'friend') {
+        friendBtn.className = 'p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 flex flex-col items-center gap-1 transition';
+        aiBtn.className = 'p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1 transition';
+      } else {
+        aiBtn.className = 'p-3 rounded-2xl border-2 border-sky-500 bg-sky-500/10 flex flex-col items-center gap-1 transition';
+        friendBtn.className = 'p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1 transition';
+      }
+      updatePlayerCountLabel();
+    }
+
+    function selectPlayerCount(count) {
+      playerCount = count;
+      [2, 3, 4].forEach(c => {
+        const btn = document.getElementById('pCount' + c);
+        if (c === count) {
+          btn.className = 'py-1.5 rounded-xl text-xs font-bold border border-amber-500 bg-amber-500/20 text-white transition';
+        } else {
+          btn.className = 'py-1.5 rounded-xl text-xs font-bold border border-white/10 bg-white/5 text-gray-300 transition';
+        }
+      });
+      updatePlayerCountLabel();
+    }
+
+    function updatePlayerCountLabel() {
+      const label = document.getElementById('playerCountLabel');
+      if (gameMode === 'ai') {
+        label.textContent = `1 Human vs ${playerCount - 1} AI Bot${playerCount > 2 ? 's' : ''}`;
+      } else {
+        label.textContent = `${playerCount} Players (Pass & Play)`;
+      }
+    }
+
+    function selectTheme(themeKey) {
+      currentThemeKey = themeKey;
+      document.getElementById('themeNameLabel').textContent = THEMES[themeKey].name;
+      THEME_KEYS.forEach(k => {
+        const btn = document.getElementById('themeBtn_' + k);
+        if (k === themeKey) {
+          btn.classList.add('ring-2', 'ring-amber-500', 'scale-110', 'border-white');
+          btn.classList.remove('opacity-70');
+        } else {
+          btn.classList.remove('ring-2', 'ring-amber-500', 'scale-110', 'border-white');
+          btn.classList.add('opacity-70');
+        }
+      });
+    }
+
+    function cycleThemeInGame() {
+      const idx = THEME_KEYS.indexOf(currentThemeKey);
+      selectTheme(THEME_KEYS[(idx + 1) % THEME_KEYS.length]);
+    }
+
+    function switchGameQuick() {
+      selectGameType(selectedGame === 'ludo' ? 'snakes' : 'ludo');
+      startNewMatch();
+    }
+
+    function openMainMenu() {
+      if (aiTimer) clearTimeout(aiTimer);
+      document.getElementById('gameOverModal').classList.add('hidden');
+      document.getElementById('gameOverModal').classList.remove('flex');
+      document.getElementById('mainMenu').classList.remove('hidden');
+      document.getElementById('mainMenu').classList.add('flex');
+    }
+
+    /**************************************************************
+     * 6. MATCH INITIALIZATION
+     **************************************************************/
+    function startNewMatch() {
+      if (aiTimer) clearTimeout(aiTimer);
+      getAudioCtx();
+
+      document.getElementById('mainMenu').classList.add('hidden');
+      document.getElementById('mainMenu').classList.remove('flex');
+      document.getElementById('gameOverModal').classList.add('hidden');
+      document.getElementById('gameOverModal').classList.remove('flex');
+
+      // Update Top Badges
+      const badge = document.getElementById('hudGameBadge');
+      const quickLabel = document.getElementById('quickSwitchLabel');
+      const rulesBar = document.getElementById('rulesMiniBar');
+
+      if (selectedGame === 'ludo') {
+        badge.textContent = 'CLASSIC LUDO';
+        badge.className = 'text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30';
+        quickLabel.textContent = 'Play Snakes';
+        rulesBar.innerHTML = '<span>★ Safe Spot</span><span>&bull;</span><span>Roll <strong class="text-white">6</strong> to Exit Yard</span><span>&bull;</span><span>Cut or Home = Bonus Roll</span>';
+      } else {
+        badge.textContent = 'SNAKES & LADDERS';
+        badge.className = 'text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+        quickLabel.textContent = 'Play Ludo';
+        rulesBar.innerHTML = '<span>▲ 7 Ladders Boost Up</span><span>&bull;</span><span>▼ 7 Snakes Slide Down</span><span>&bull;</span><span>Exact <strong class="text-white">100</strong> Wins</span>';
+      }
+
+      // Configure active slots (2P uses Red[0] & Yellow[2] so corners are opposite)
+      const slotIndices = playerCount === 2 ? [0, 2] : (playerCount === 3 ? [0, 1, 2] : [0, 1, 2, 3]);
+
+      activePlayers = slotIndices.map((slotIdx, idx) => {
+        const def = PLAYER_DEFS[slotIdx];
+        const isAI = gameMode === 'ai' && idx > 0;
+        const displayName = isAI ? `${def.name} Bot` : def.name;
+
+        // Ludo uses 4 tokens (steps = -1 in yard, 0..50 main track, 51..55 home stretch, 56 finished)
+        const ludoTokens = [0, 1, 2, 3].map(tIdx => {
+          const [gx, gy] = LUDO_YARD_SPOTS[slotIdx][tIdx];
+          const pt = ludoGridToPixel(gx, gy);
+          return {
+            index: tIdx,
+            steps: -1,
+            x: pt.x,
+            y: pt.y
+          };
+        });
+
+        // Snakes & Ladders uses 1 token starting at tile 1
+        const snakePt = getSnakeTileCenter(1);
+
+        return {
+          slotIdx,
+          def,
+          isAI,
+          displayName,
+          ludoTokens,
+          snakeTile: 1,
+          snakeX: snakePt.x,
+          snakeY: snakePt.y
+        };
+      });
+
+      currentTurnIdx = 0;
+      diceValue = 6;
+      floatingTexts = [];
+      drawDiceFace(diceValue);
+      prepareTurn(false);
+    }
+
+    function prepareTurn(isBonusRoll = false) {
+      validTokenMoves = [];
+      turnPhase = 'WAIT_ROLL';
+      document.getElementById('tokenQuickBar').classList.add('hidden');
+      document.getElementById('tokenQuickBar').classList.remove('flex');
+
+      const player = activePlayers[currentTurnIdx];
+      const prefix = isBonusRoll ? `${player.displayName} Bonus Roll!` : `${player.displayName}'s Turn`;
+
+      updateHUD(`${prefix} — Roll Dice`);
+
+      if (player.isAI) {
+        document.getElementById('controlHintText').textContent = `${player.displayName} is rolling the dice...`;
+        document.getElementById('diceBtn').disabled = true;
+        aiTimer = setTimeout(() => triggerDiceRoll(), 650);
+      } else {
+        document.getElementById('controlHintText').textContent = isBonusRoll
+          ? 'Bonus Roll! Tap dice or press Space'
+          : 'Tap the dice or press Space to roll';
+        document.getElementById('diceBtn').disabled = false;
+      }
+    }
+
+    function updateHUD(statusMsg) {
+      document.getElementById('statusBanner').textContent = statusMsg;
+      const activeP = activePlayers[currentTurnIdx];
+
+      document.getElementById('activeTurnTitle').textContent = `${activeP.displayName}'s Turn`;
+      document.getElementById('activeTurnDot').style.backgroundColor = activeP.def.hex;
+
+      // Render Player Cards
+      const container = document.getElementById('playerCardsContainer');
+      container.className = `grid gap-2 ${activePlayers.length === 2 ? 'grid-cols-2' : (activePlayers.length === 3 ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-4')}`;
+
+      container.innerHTML = activePlayers.map((p, idx) => {
+        const isCurrent = idx === currentTurnIdx;
+        let metricPrimary = '';
+        let metricSub = '';
+
+        if (selectedGame === 'ludo') {
+          const homeCount = p.ludoTokens.filter(t => t.steps === 56).length;
+          metricPrimary = `${homeCount}/4`;
+          metricSub = 'Home';
+        } else {
+          metricPrimary = `Tile ${p.snakeTile}`;
+          metricSub = `${p.snakeTile}%`;
+        }
+
+        return `
+          <div class="flex items-center justify-between px-3 py-1.5 rounded-xl border-2 transition-all ${
+            isCurrent ? `${p.def.border} ${p.def.badgeBg}` : 'border-white/10 bg-white/5 opacity-65'
+          }">
+            <div class="flex flex-col min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full ${p.def.dot} ${isCurrent ? 'animate-ping' : ''}"></span>
+                <span class="text-[11px] font-bold uppercase tracking-wider ${p.def.text} truncate">${p.displayName}</span>
+              </div>
+              <span class="text-base sm:text-lg font-extrabold text-white leading-tight">${metricPrimary}</span>
+            </div>
+            <div class="text-right text-[10px] text-gray-400 font-semibold">
+              ${metricSub}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /**************************************************************
+     * 7. DICE ROLLING & TURN LOGIC
+     **************************************************************/
+    function handleDiceClick() {
+      if (turnPhase !== 'WAIT_ROLL') return;
+      const player = activePlayers[currentTurnIdx];
+      if (player.isAI) return;
+      triggerDiceRoll();
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.code === 'Enter') {
+        if (!document.getElementById('mainMenu').classList.contains('hidden')) return;
+        if (turnPhase === 'WAIT_ROLL' && !activePlayers[currentTurnIdx].isAI) {
+          e.preventDefault();
+          triggerDiceRoll();
+        }
+      }
+    });
+
+    function triggerDiceRoll() {
+      if (turnPhase !== 'WAIT_ROLL') return;
+      turnPhase = 'ROLLING';
+      const diceBtn = document.getElementById('diceBtn');
+      diceBtn.classList.add('dice-rolling');
+
+      let ticks = 0;
+      const rollInterval = setInterval(() => {
+        ticks++;
+        const tempVal = Math.floor(Math.random() * 6) + 1;
+        drawDiceFace(tempVal);
+        playSound('dice');
+
+        if (ticks >= 7) {
+          clearInterval(rollInterval);
+          diceBtn.classList.remove('dice-rolling');
+
+          // Slightly helpful opening roll in Ludo if all tokens are locked in yard
+          const player = activePlayers[currentTurnIdx];
+          if (selectedGame === 'ludo' && player.ludoTokens.every(t => t.steps === -1) && Math.random() < 0.25) {
+            diceValue = 6;
+          } else {
+            diceValue = Math.floor(Math.random() * 6) + 1;
+          }
+
+          drawDiceFace(diceValue);
+          document.getElementById('rolledValueText').textContent = diceValue;
+          onDiceRollComplete();
+        }
+      }, 60);
+    }
+
+    function onDiceRollComplete() {
+      const player = activePlayers[currentTurnIdx];
+
+      if (selectedGame === 'ludo') {
+        evaluateLudoRoll(player);
+      } else {
+        evaluateSnakesRoll(player);
+      }
+    }
+
+    /**************************************************************
+     * 8. LUDO RULES, AI & ANIMATION
+     **************************************************************/
+    function evaluateLudoRoll(player) {
+      validTokenMoves = [];
+
+      player.ludoTokens.forEach((token, idx) => {
+        if (token.steps === -1) {
+          if (diceValue === 6) validTokenMoves.push(idx);
+        } else if (token.steps + diceValue <= 56) {
+          validTokenMoves.push(idx);
+        }
+      });
+
+      if (validTokenMoves.length === 0) {
+        updateHUD(`${player.displayName} rolled ${diceValue} — No valid moves`);
+        document.getElementById('controlHintText').textContent = 'No movable tokens this turn...';
+        setTimeout(() => advanceToNextPlayer(), 950);
+        return;
+      }
+
+      // If only 1 token can move (or all movable tokens are in the yard), auto-move it for smooth UX!
+      const allMovableInYard = validTokenMoves.every(idx => player.ludoTokens[idx].steps === -1);
+      if (validTokenMoves.length === 1 || allMovableInYard) {
+        executeLudoMove(player, validTokenMoves[0]);
+        return;
+      }
+
+      // If AI has multiple choices, pick the highest-scoring tactical move
+      if (player.isAI) {
+        turnPhase = 'WAIT_MOVE';
+        const bestTokenIdx = chooseBestLudoAIMove(player, validTokenMoves);
+        setTimeout(() => executeLudoMove(player, bestTokenIdx), 550);
+        return;
+      }
+
+      // Human has multiple choices: highlight tokens on board + show quick-select bar
+      turnPhase = 'WAIT_MOVE';
+      updateHUD(`${player.displayName} rolled ${diceValue} — Select a token`);
+      document.getElementById('controlHintText').textContent = 'Tap a glowing token on the board (or choose below)';
+
+      const quickBar = document.getElementById('tokenQuickBar');
+      quickBar.classList.remove('hidden');
+      quickBar.classList.add('flex');
+      quickBar.innerHTML = validTokenMoves.map(tIdx => `
+        <button
+          onclick="executeLudoMove(activePlayers[currentTurnIdx], ${tIdx})"
+          class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-white/10 hover:bg-white/20 text-white border border-white/20 transition"
+        >
+          Token #${tIdx + 1}
+        </button>
+      `).join('');
+    }
+
+    function chooseBestLudoAIMove(player, movableIndices) {
+      let bestIdx = movableIndices[0];
+      let bestScore = -Infinity;
+
+      for (const tIdx of movableIndices) {
+        const token = player.ludoTokens[tIdx];
+        let score = 0;
+
+        if (token.steps === -1 && diceValue === 6) {
+          score = 85; // High priority to unlock a token from yard
+        } else {
+          const targetSteps = token.steps + diceValue;
+          if (targetSteps === 56) {
+            score = 120; // Reaching home triangle
+          } else if (targetSteps <= 50) {
+            const destGlobalIdx = (LUDO_START_INDEX[player.slotIdx] + targetSteps) % 52;
+            // Check if landing captures an opponent
+            const canCapture = checkOpponentTokensAtGlobal(player.slotIdx, destGlobalIdx).length > 0;
+            if (canCapture && !LUDO_SAFE_INDICES.has(destGlobalIdx)) {
+              score = 150;
+            } else if (LUDO_SAFE_INDICES.has(destGlobalIdx)) {
+              score = 75;
+            } else {
+              score = targetSteps;
+            }
+          } else {
+            score = 65 + targetSteps; // Entering safe home stretch
+          }
+        }
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestIdx = tIdx;
+        }
+      }
+      return bestIdx;
+    }
+
+    function executeLudoMove(player, tokenIdx) {
+      if (turnPhase === 'ANIMATING') return;
+      turnPhase = 'ANIMATING';
+      validTokenMoves = [];
+      document.getElementById('tokenQuickBar').classList.add('hidden');
+      document.getElementById('tokenQuickBar').classList.remove('flex');
+
+      const token = player.ludoTokens[tokenIdx];
+
+      // Unlocking from Yard onto Start Square (step 0)
+      if (token.steps === -1) {
+        token.steps = 0;
+        const pt = getLudoStepPixel(player.slotIdx, 0);
+        animateTokenPosition(token, pt.x, pt.y, 240, () => {
+          playSound('unlock');
+          spawnFloatingText('UNLOCKED!', pt.x, pt.y - 18, player.def.hex);
+          finishLudoMove(player, token, false);
+        });
+        return;
+      }
+
+      // Step-by-step hop animation along the path
+      let remaining = diceValue;
+      function hopNext() {
+        if (remaining <= 0) {
+          finishLudoMove(player, token, false);
+          return;
+        }
+        remaining--;
+        token.steps++;
+        const pt = getLudoStepPixel(player.slotIdx, token.steps);
+        animateTokenPosition(token, pt.x, pt.y, 135, () => {
+          playSound('step');
+          hopNext();
+        });
+      }
+      hopNext();
+    }
+
+    function finishLudoMove(player, token) {
+      let capturedOpponent = false;
+      let reachedHome = token.steps === 56;
+
+      if (reachedHome) {
+        playSound('home');
+        spawnFloatingText('HOME! +Bonus', token.x, token.y - 20, player.def.hex);
+      } else if (token.steps >= 0 && token.steps <= 50) {
+        const globalIdx = (LUDO_START_INDEX[player.slotIdx] + token.steps) % 52;
+        if (!LUDO_SAFE_INDICES.has(globalIdx)) {
+          const victims = checkOpponentTokensAtGlobal(player.slotIdx, globalIdx);
+          if (victims.length > 0) {
+            capturedOpponent = true;
+            playSound('capture');
+            spawnFloatingText('CAPTURED! +Bonus', token.x, token.y - 20, '#f43f5e');
+            victims.forEach(({ oppPlayer, oppToken }) => {
+              oppToken.steps = -1;
+              const [gx, gy] = LUDO_YARD_SPOTS[oppPlayer.slotIdx][oppToken.index];
+              const yardPt = ludoGridToPixel(gx, gy);
+              animateTokenPosition(oppToken, yardPt.x, yardPt.y, 280);
+            });
+          }
+        }
+      }
+
+      // Check Win Condition (all 4 tokens at step 56)
+      if (player.ludoTokens.every(t => t.steps === 56)) {
+        triggerGameOver(player);
+        return;
+      }
+
+      // Bonus turn on rolling 6, capturing an opponent, or getting a token home
+      const earnBonusRoll = (diceValue === 6 || capturedOpponent || reachedHome);
+      if (earnBonusRoll) {
+        setTimeout(() => prepareTurn(true), 450);
+      } else {
+        setTimeout(() => advanceToNextPlayer(), 450);
+      }
+    }
+
+    function checkOpponentTokensAtGlobal(mySlotIdx, targetGlobalIdx) {
+      const matches = [];
+      for (const p of activePlayers) {
+        if (p.slotIdx === mySlotIdx) continue;
+        for (const t of p.ludoTokens) {
+          if (t.steps >= 0 && t.steps <= 50) {
+            const gIdx = (LUDO_START_INDEX[p.slotIdx] + t.steps) % 52;
+            if (gIdx === targetGlobalIdx) {
+              matches.push({ oppPlayer: p, oppToken: t });
+            }
+          }
+        }
+      }
+      return matches;
+    }
+
+    /**************************************************************
+     * 9. SNAKES & LADDERS RULES & ANIMATION
+     **************************************************************/
+    function evaluateSnakesRoll(player) {
+      turnPhase = 'ANIMATING';
+      const targetTile = player.snakeTile + diceValue;
+
+      if (targetTile > 100) {
+        updateHUD(`${player.displayName} rolled ${diceValue} — Needs exact roll for 100`);
+        spawnFloatingText('Need Exact 100!', player.snakeX, player.snakeY - 20, '#94a3b8');
+        setTimeout(() => {
+          if (diceValue === 6) prepareTurn(true);
+          else advanceToNextPlayer();
+        }, 850);
+        return;
+      }
+
+      let stepsLeft = diceValue;
+      function stepNextTile() {
+        if (stepsLeft <= 0) {
+          checkSnakeOrLadder(player);
+          return;
+        }
+        stepsLeft--;
+        player.snakeTile++;
+        const pt = getSnakeTileCenter(player.snakeTile);
+        animateSnakeToken(player, pt.x, pt.y, 145, () => {
+          playSound('step');
+          stepNextTile();
+        });
+      }
+      stepNextTile();
+    }
+
+    function checkSnakeOrLadder(player) {
+      const ladder = LADDERS.find(l => l.from === player.snakeTile);
+      const snake = SNAKES.find(s => s.from === player.snakeTile);
+
+      if (ladder) {
+        playSound('ladder');
+        spawnFloatingText(`LADDER! ↑ ${ladder.to}`, player.snakeX, player.snakeY - 20, '#34d399');
+        player.snakeTile = ladder.to;
+        const dest = getSnakeTileCenter(ladder.to);
+        animateSnakeToken(player, dest.x, dest.y, 480, () => finishSnakesTurn(player));
+      } else if (snake) {
+        playSound('snake');
+        spawnFloatingText(`SNAKE! ↓ ${snake.to}`, player.snakeX, player.snakeY - 20, '#f43f5e');
+        player.snakeTile = snake.to;
+        const dest = getSnakeTileCenter(snake.to);
+        animateSnakeToken(player, dest.x, dest.y, 480, () => finishSnakesTurn(player));
+      } else {
+        finishSnakesTurn(player);
+      }
+    }
+
+    function finishSnakesTurn(player) {
+      if (player.snakeTile === 100) {
+        triggerGameOver(player);
+        return;
+      }
+
+      if (diceValue === 6) {
+        setTimeout(() => prepareTurn(true), 420);
+      } else {
+        setTimeout(() => advanceToNextPlayer(), 420);
+      }
+    }
+
+    function advanceToNextPlayer() {
+      currentTurnIdx = (currentTurnIdx + 1) % activePlayers.length;
+      prepareTurn(false);
+    }
+
+    function triggerGameOver(winner) {
+      turnPhase = 'GAME_OVER';
+      playSound('win');
+
+      document.getElementById('winnerTitle').textContent = `${winner.displayName} Wins!`;
+      document.getElementById('winnerSubtitle').textContent = selectedGame === 'ludo'
+        ? 'All 4 tokens safely reached the Home Triangle'
+        : 'Reached Tile 100 first!';
+
+      const standingsBox = document.getElementById('finalStandingsBox');
+      standingsBox.innerHTML = activePlayers.map((p) => {
+        const stat = selectedGame === 'ludo'
+          ? `${p.ludoTokens.filter(t => t.steps === 56).length} / 4 Home`
+          : `Tile ${p.snakeTile} / 100`;
+        const isWin = p === winner;
+        return `
+          <div class="flex items-center justify-between px-3 py-2 rounded-xl ${isWin ? 'bg-amber-500/15 border border-amber-500/30' : 'bg-white/5'}">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full" style="background:${p.def.hex}"></span>
+              <span class="text-xs font-bold text-white">${p.displayName}</span>
+            </div>
+            <span class="text-xs font-extrabold ${isWin ? 'text-amber-400' : 'text-gray-400'}">${stat}</span>
+          </div>
+        `;
+      }).join('');
+
+      const modal = document.getElementById('gameOverModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    /**************************************************************
+     * 10. CANVAS INTERACTION (CLICKING LUDO TOKENS DIRECTLY)
+     **************************************************************/
+    canvas.addEventListener('pointerdown', (e) => {
+      if (selectedGame !== 'ludo' || turnPhase !== 'WAIT_MOVE') return;
+      const player = activePlayers[currentTurnIdx];
+      if (player.isAI) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const px = (e.clientX - rect.left) * (SIZE / rect.width);
+      const py = (e.clientY - rect.top) * (SIZE / rect.height);
+
+      // Find closest valid movable token within click radius
+      let chosenIdx = -1;
+      let minDist = 36;
+      for (const tIdx of validTokenMoves) {
+        const tok = player.ludoTokens[tIdx];
+        const d = Math.hypot(px - tok.x, py - tok.y);
+        if (d < minDist) {
+          minDist = d;
+          chosenIdx = tIdx;
+        }
+      }
+
+      if (chosenIdx !== -1) {
+        executeLudoMove(player, chosenIdx);
+      }
+    });
+
+    /**************************************************************
+     * 11. COORDINATE & ANIMATION HELPERS
+     **************************************************************/
+    function ludoGridToPixel(col, row) {
+      return {
+        x: FRAME_PAD + (col + 0.5) * LUDO_CELL,
+        y: FRAME_PAD + (row + 0.5) * LUDO_CELL
+      };
+    }
+
+    function getLudoStepPixel(slotIdx, steps) {
+      if (steps <= 50) {
+        const globalIdx = (LUDO_START_INDEX[slotIdx] + steps) % 52;
+        const [col, row] = LUDO_MAIN_TRACK[globalIdx];
+        return ludoGridToPixel(col, row);
+      } else {
+        const homeIdx = Math.min(5, steps - 51);
+        const [col, row] = LUDO_HOME_PATHS[slotIdx][homeIdx];
+        return ludoGridToPixel(col, row);
+      }
+    }
+
+    function getSnakeTileCenter(tile) {
+      const clamped = Math.max(1, Math.min(100, tile));
+      const rowFromBottom = Math.floor((clamped - 1) / 10);
+      const colInRow = (clamped - 1) % 10;
+      const gridRow = 9 - rowFromBottom;
+      const gridCol = (rowFromBottom % 2 === 0) ? colInRow : (9 - colInRow);
+
+      return {
+        x: FRAME_PAD + (gridCol + 0.5) * SNAKE_CELL,
+        y: FRAME_PAD + (gridRow + 0.5) * SNAKE_CELL
+      };
+    }
+
+    function animateTokenPosition(token, targetX, targetY, duration, onComplete) {
+      const startX = token.x;
+      const startY = token.y;
+      const startTime = performance.now();
+
+      function tick(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const ease = 1 - Math.pow(1 - t, 3);
+        token.x = startX + (targetX - startX) * ease;
+        token.y = startY + (targetY - startY) * ease - Math.sin(t * Math.PI) * 10;
+        if (t < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          token.x = targetX;
+          token.y = targetY;
+          if (onComplete) onComplete();
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function animateSnakeToken(player, targetX, targetY, duration, onComplete) {
+      const startX = player.snakeX;
+      const startY = player.snakeY;
+      const startTime = performance.now();
+
+      function tick(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const ease = 1 - Math.pow(1 - t, 3);
+        player.snakeX = startX + (targetX - startX) * ease;
+        player.snakeY = startY + (targetY - startY) * ease - Math.sin(t * Math.PI) * 12;
+        if (t < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          player.snakeX = targetX;
+          player.snakeY = targetY;
+          if (onComplete) onComplete();
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function spawnFloatingText(text, x, y, color) {
+      floatingTexts.push({ text, x, y, color, alpha: 1, dy: -1.1 });
+    }
+
+    /**************************************************************
+     * 12. RENDERING: DICE, LUDO BOARD & SNAKES BOARD
+     **************************************************************/
+    function drawDiceFace(val) {
+      diceCtx.clearRect(0, 0, 56, 56);
+      const p = activePlayers[currentTurnIdx];
+      const pipColor = p ? p.def.hex : '#0f172a';
+
+      const coords = {
+        1: [[28, 28]],
+        2: [[16, 16], [40, 40]],
+        3: [[15, 15], [28, 28], [41, 41]],
+        4: [[16, 16], [40, 16], [16, 40], [40, 40]],
+        5: [[15, 15], [41, 15], [28, 28], [15, 41], [41, 41]],
+        6: [[16, 14], [40, 14], [16, 28], [40, 28], [16, 42], [40, 42]]
+      };
+
+      (coords[val] || coords[1]).forEach(([x, y]) => {
+        diceCtx.beginPath();
+        diceCtx.arc(x, y, val === 1 ? 6.5 : 4.6, 0, Math.PI * 2);
+        diceCtx.fillStyle = pipColor;
+        diceCtx.fill();
+      });
+    }
+
+    function drawOuterFrame(theme) {
+      ctx.fillStyle = theme.frameOuter;
+      ctx.fillRect(0, 0, SIZE, SIZE);
+
+      ctx.fillStyle = theme.frameInner;
+      ctx.beginPath();
+      ctx.roundRect(10, 10, SIZE - 20, SIZE - 20, 24);
+      ctx.fill();
+
+      ctx.fillStyle = theme.surface;
+      ctx.beginPath();
+      ctx.roundRect(FRAME_PAD, FRAME_PAD, BOARD_SIZE, BOARD_SIZE, 14);
+      ctx.fill();
+    }
+
+    function drawStar(cx, cy, outerR, innerR, color) {
+      ctx.save();
+      ctx.beginPath();
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 === 0 ? outerR : innerR;
+        const angle = (i * Math.PI) / 5 - Math.PI / 2;
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function renderLudoBoard(theme) {
+      drawOuterFrame(theme);
+
+      // 1. Draw 15x15 Track Grid & Colored Home Stretches
+      for (let r = 0; r < 15; r++) {
+        for (let c = 0; c < 15; c++) {
+          // Skip 6x6 corner yards and 3x3 center home
+          if ((r < 6 && c < 6) || (r < 6 && c > 8) || (r > 8 && c < 6) || (r > 8 && c > 8)) continue;
+          if (r >= 6 && r <= 8 && c >= 6 && c <= 8) continue;
+
+          const x = FRAME_PAD + c * LUDO_CELL;
+          const y = FRAME_PAD + r * LUDO_CELL;
+
+          let cellBg = theme.surface;
+          // Home Columns & Start Squares
+          if (c === 7 && r >= 9 && r <= 13) cellBg = PLAYER_DEFS[0].hex;
+          else if (c === 6 && r === 13) cellBg = PLAYER_DEFS[0].hex;
+          else if (r === 7 && c >= 1 && c <= 5) cellBg = PLAYER_DEFS[1].hex;
+          else if (c === 1 && r === 6) cellBg = PLAYER_DEFS[1].hex;
+          else if (c === 7 && r >= 1 && r <= 5) cellBg = PLAYER_DEFS[2].hex;
+          else if (c === 8 && r === 1) cellBg = PLAYER_DEFS[2].hex;
+          else if (r === 7 && c >= 9 && c <= 13) cellBg = PLAYER_DEFS[3].hex;
+          else if (c === 13 && r === 8) cellBg = PLAYER_DEFS[3].hex;
+
+          ctx.fillStyle = cellBg;
+          ctx.fillRect(x, y, LUDO_CELL, LUDO_CELL);
+          ctx.strokeStyle = theme.gridStroke;
+          ctx.lineWidth = 1.2;
+          ctx.strokeRect(x, y, LUDO_CELL, LUDO_CELL);
+        }
+      }
+
+      // 2. Draw Safe Stars on all 8 Safe Squares
+      LUDO_SAFE_INDICES.forEach(idx => {
+        const [c, r] = LUDO_MAIN_TRACK[idx];
+        const pt = ludoGridToPixel(c, r);
+        const isStart = [0, 13, 26, 39].includes(idx);
+        drawStar(pt.x, pt.y, 11, 5, isStart ? '#ffffff' : theme.textColor);
+      });
+
+      // 3. Draw 4 Corner Yards
+      const yardConfigs = [
+        { slot: 0, c: 0, r: 9 }, // Red Bottom-Left
+        { slot: 1, c: 0, r: 0 }, // Green Top-Left
+        { slot: 2, c: 9, r: 0 }, // Yellow Top-Right
+        { slot: 3, c: 9, r: 9 }  // Blue Bottom-Right
+      ];
+
+      yardConfigs.forEach(({ slot, c, r }) => {
+        const def = PLAYER_DEFS[slot];
+        const x = FRAME_PAD + c * LUDO_CELL;
+        const y = FRAME_PAD + r * LUDO_CELL;
+        const w = 6 * LUDO_CELL;
+
+        ctx.fillStyle = def.hex;
+        ctx.fillRect(x, y, w, w);
+
+        // Inner Yard Box
+        ctx.fillStyle = theme.surface;
+        ctx.beginPath();
+        ctx.roundRect(x + 24, y + 24, w - 48, w - 48, 20);
+        ctx.fill();
+
+        // 4 Token Base Circles
+        LUDO_YARD_SPOTS[slot].forEach(([gx, gy]) => {
+          const pt = ludoGridToPixel(gx, gy);
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, 18, 0, Math.PI * 2);
+          ctx.fillStyle = def.hex;
+          ctx.globalAlpha = 0.22;
+          ctx.fill();
+          ctx.globalAlpha = 1;
+          ctx.lineWidth = 2.5;
+          ctx.strokeStyle = def.hex;
+          ctx.stroke();
+        });
+      });
+
+      // 4. Center 3x3 Home Triangles
+      const cx = SIZE / 2;
+      const cy = SIZE / 2;
+      const homeMinX = FRAME_PAD + 6 * LUDO_CELL;
+      const homeMaxX = FRAME_PAD + 9 * LUDO_CELL;
+      const homeMinY = FRAME_PAD + 6 * LUDO_CELL;
+      const homeMaxY = FRAME_PAD + 9 * LUDO_CELL;
+
+      const triangles = [
+        { color: PLAYER_DEFS[0].hex, pts: [[homeMinX, homeMaxY], [homeMaxX, homeMaxY], [cx, cy]] }, // Red Bottom
+        { color: PLAYER_DEFS[1].hex, pts: [[homeMinX, homeMinY], [homeMinX, homeMaxY], [cx, cy]] }, // Green Left
+        { color: PLAYER_DEFS[2].hex, pts: [[homeMinX, homeMinY], [homeMaxX, homeMinY], [cx, cy]] }, // Yellow Top
+        { color: PLAYER_DEFS[3].hex, pts: [[homeMaxX, homeMinY], [homeMaxX, homeMaxY], [cx, cy]] }  // Blue Right
+      ];
+
+      triangles.forEach(t => {
+        ctx.beginPath();
+        ctx.moveTo(t.pts[0][0], t.pts[0][1]);
+        ctx.lineTo(t.pts[1][0], t.pts[1][1]);
+        ctx.lineTo(t.pts[2][0], t.pts[2][1]);
+        ctx.closePath();
+        ctx.fillStyle = t.color;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+
+      // Center Trophy Circle
+      ctx.beginPath();
+      ctx.arc(cx, cy, 16, 0, Math.PI * 2);
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#fbbf24';
+      ctx.stroke();
+      drawStar(cx, cy, 8, 4, '#fbbf24');
+
+      // 5. Draw Tokens (With Cluster Offsets When Sharing Squares)
+      const posGroups = new Map();
+      activePlayers.forEach(p => {
+        p.ludoTokens.forEach(t => {
+          const key = `${Math.round(t.x / 6)},${Math.round(t.y / 6)}`;
+          if (!posGroups.has(key)) posGroups.set(key, []);
+          posGroups.get(key).push({ player: p, token: t });
+        });
+      });
+
+      posGroups.forEach(group => {
+        group.forEach((item, idx) => {
+          const { player, token } = item;
+          let offsetX = 0;
+          let offsetY = 0;
+          let scale = 1;
+
+          if (group.length > 1) {
+            const angle = (idx / group.length) * Math.PI * 2;
+            offsetX = Math.cos(angle) * 7.5;
+            offsetY = Math.sin(angle) * 7.5;
+            scale = 0.84;
+          }
+
+          const isMovable = (player === activePlayers[currentTurnIdx]) &&
+            turnPhase === 'WAIT_MOVE' &&
+            validTokenMoves.includes(token.index);
+
+          drawPawnToken(token.x + offsetX, token.y + offsetY, 14.5 * scale, player.def, isMovable);
+        });
+      });
+    }
+
+    function renderSnakesBoard(theme) {
+      drawOuterFrame(theme);
+
+      // 1. 10x10 Checkerboard Grid with Numbers
+      for (let tile = 1; tile <= 100; tile++) {
+        const pt = getSnakeTileCenter(tile);
+        const x = pt.x - SNAKE_CELL / 2;
+        const y = pt.y - SNAKE_CELL / 2;
+
+        ctx.fillStyle = tile % 2 === 0 ? theme.surface : theme.surfaceAlt;
+        if (tile === 100) ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(x, y, SNAKE_CELL, SNAKE_CELL);
+
+        ctx.strokeStyle = theme.gridStroke;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, SNAKE_CELL, SNAKE_CELL);
+
+        ctx.fillStyle = tile === 100 ? '#ffffff' : theme.textColor;
+        ctx.font = '700 12px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(tile, x + 5, y + 15);
+      }
+
+      // 2. Draw Ladders
+      LADDERS.forEach(l => {
+        const start = getSnakeTileCenter(l.from);
+        const end = getSnakeTileCenter(l.to);
+        const dx = end.x - start.x;
+        const dy = end.y - start.y;
+        const len = Math.hypot(dx, dy);
+        const nx = -dy / len;
+        const ny = dx / len;
+        const railSpread = 10;
+
+        ctx.save();
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = 4.5;
+        ctx.lineCap = 'round';
+
+        // Left & Right Rails
+        ctx.beginPath();
+        ctx.moveTo(start.x + nx * railSpread, start.y + ny * railSpread);
+        ctx.lineTo(end.x + nx * railSpread, end.y + ny * railSpread);
+        ctx.moveTo(start.x - nx * railSpread, start.y - ny * railSpread);
+        ctx.lineTo(end.x - nx * railSpread, end.y - ny * railSpread);
+        ctx.stroke();
+
+        // Rungs
+        const steps = Math.floor(len / 20);
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#f59e0b';
+        for (let i = 1; i < steps; i++) {
+          const t = i / steps;
+          const rx = start.x + dx * t;
+          const ry = start.y + dy * t;
+          ctx.beginPath();
+          ctx.moveTo(rx + nx * railSpread, ry + ny * railSpread);
+          ctx.lineTo(rx - nx * railSpread, ry - ny * railSpread);
+          ctx.stroke();
+        }
+        ctx.restore();
+      });
+
+      // 3. Draw Bezier Snakes
+      SNAKES.forEach(s => {
+        const head = getSnakeTileCenter(s.from);
+        const tail = getSnakeTileCenter(s.to);
+        const midX = (head.x + tail.x) / 2;
+        const midY = (head.y + tail.y) / 2;
+        const dx = tail.x - head.x;
+        const dy = tail.y - head.y;
+        const len = Math.hypot(dx, dy);
+        const nx = -dy / len;
+        const ny = dx / len;
+        const wave = 36;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(head.x, head.y);
+        ctx.bezierCurveTo(
+          head.x + dx * 0.33 + nx * wave,
+          head.y + dy * 0.33 + ny * wave,
+          head.x + dx * 0.66 - nx * wave,
+          head.y + dy * 0.66 - ny * wave,
+          tail.x,
+          tail.y
+        );
+        ctx.strokeStyle = 'rgba(0,0,0,0.32)';
+        ctx.lineWidth = 12;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        ctx.strokeStyle = s.color;
+        ctx.lineWidth = 9;
+        ctx.stroke();
+
+        // Dotted scales pattern along snake
+        ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([4, 8]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Snake Head & Eyes
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, 10, 0, Math.PI * 2);
+        ctx.fillStyle = s.color;
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(head.x - 3.5, head.y - 2, 2.5, 0, Math.PI * 2);
+        ctx.arc(head.x + 3.5, head.y - 2, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#0f172a';
+        ctx.beginPath();
+        ctx.arc(head.x - 3.5, head.y - 2, 1.2, 0, Math.PI * 2);
+        ctx.arc(head.x + 3.5, head.y - 2, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      // 4. Draw Player Tokens on Snakes Board
+      activePlayers.forEach((p, idx) => {
+        const sameTilePlayers = activePlayers.filter(other => other.snakeTile === p.snakeTile);
+        let ox = 0;
+        let oy = 0;
+        if (sameTilePlayers.length > 1) {
+          const subIdx = sameTilePlayers.indexOf(p);
+          const angle = (subIdx / sameTilePlayers.length) * Math.PI * 2;
+          ox = Math.cos(angle) * 10;
+          oy = Math.sin(angle) * 10;
+        }
+        const isCurrent = idx === currentTurnIdx && turnPhase === 'WAIT_ROLL';
+        drawPawnToken(p.snakeX + ox, p.snakeY + oy, 15.5, p.def, isCurrent);
+      });
+    }
+
+    function drawPawnToken(x, y, radius, def, highlight = false) {
+      ctx.save();
+
+      // Pulsing Selection Halo
+      if (highlight) {
+        const pulseR = radius + 6 + Math.sin(pulseTimer * 0.12) * 3.5;
+        ctx.beginPath();
+        ctx.arc(x, y, pulseR, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2.8;
+        ctx.setLineDash([5, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Drop Shadow
+      ctx.beginPath();
+      ctx.arc(x + 1.5, y + 3, radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.38)';
+      ctx.fill();
+
+      // Outer Pawn Ring
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fillStyle = def.hex;
+      ctx.fill();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+
+      // Inner Glossy Cap
+      ctx.beginPath();
+      ctx.arc(x, y - 1.5, radius * 0.52, 0, Math.PI * 2);
+      ctx.fillStyle = def.light;
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function renderLoop() {
+      pulseTimer++;
+      ctx.clearRect(0, 0, SIZE, SIZE);
+
+      const theme = THEMES[currentThemeKey];
+      if (selectedGame === 'ludo') {
+        renderLudoBoard(theme);
+      } else {
+        renderSnakesBoard(theme);
+      }
+
+      // Floating Feedback Popups
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.y += ft.dy;
+        ft.alpha -= 0.02;
+        if (ft.alpha <= 0) {
+          floatingTexts.splice(i, 1);
+        } else {
+          ctx.save();
+          ctx.globalAlpha = ft.alpha;
+          ctx.font = '800 20px Inter, sans-serif';
+          ctx.fillStyle = ft.color;
+          ctx.textAlign = 'center';
+          ctx.shadowColor = 'rgba(0,0,0,0.85)';
+          ctx.shadowBlur = 8;
+          ctx.fillText(ft.text, ft.x, ft.y);
+          ctx.restore();
+        }
+      }
+
+      requestAnimationFrame(renderLoop);
+    }
+
+    window.onload = function () {
+      startNewMatch();
+      document.getElementById('mainMenu').classList.remove('hidden');
+      document.getElementById('mainMenu').classList.add('flex');
+      requestAnimationFrame(renderLoop);
+    };
+  </script>
+</body>
+</html>
