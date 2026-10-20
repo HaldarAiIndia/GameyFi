@@ -2,10 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>GameyFi | Free Browser Board Games and Table Sports</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>GameyFi | Free Games</title>
 <meta name="description" content="GameyFi is a free collection of browser games: Ludo, Bead 16, Tic Tac Toe, Carrom and 8-Ball Pool. Play on your phone, tablet or computer.">
-<meta name="theme-color" content="#17181a">
+<meta name="theme-color" content="#7B2FFF">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GameyFi">
 <link rel="canonical" href="https://gameyfi.vercel.app/">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -16,649 +19,1360 @@
 <meta property="og:description" content="Play Ludo, Bead 16, Tic Tac Toe, Carrom and 8-Ball Pool free in your browser.">
 <meta property="og:url" content="https://gameyfi.vercel.app/">
 <meta property="og:image" content="https://gameyfi.vercel.app/icons/icon-512.png">
-<meta property="og:image:alt" content="GameyFi logo">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="GameyFi | Free Browser Board Games and Table Sports">
-<meta name="apple-mobile-web-app-title" content="GameyFi">
 <meta name="color-scheme" content="dark">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap" rel="stylesheet">
 <style>
-:root{--bg-primary:#17181a;--bg-secondary:#202225;--bg-tertiary:#2c2f33;--bg-code:#101214;--bg-hover:#35383c;--text-primary:#f0f2f5;--text-secondary:#a8b3cf;--text-active:#82aaff;--accent-2:#c792ea;--border-color:#3a3d42;--error-color:#ff8a80;--sidebar-width:260px;--font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;--ease:cubic-bezier(.16,1,.3,1);--hue:var(--text-active)}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-[hidden]{display:none!important}
-html{background:var(--bg-primary);-webkit-text-size-adjust:100%;scroll-behavior:smooth}
-@media(min-width:1600px){html{font-size:118%}}
-@media(min-width:2400px){html{font-size:150%}}
-body{margin:0;min-height:100vh;font-family:var(--font-family);font-size:16px;color:var(--text-primary);background:var(--bg-primary);overflow-x:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-a{color:inherit;text-decoration:none}
-button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}
-*:focus-visible{outline:2px solid var(--text-active);outline-offset:2px;border-radius:4px}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-.wrap{width:100%;max-width:80rem;margin:0 auto;padding:0 clamp(1rem,4vw,2rem)}
-.i{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.pi{width:13px;height:13px;fill:currentColor}
+/* ===================== TOKENS & SYSTEM ===================== */
+:root {
+  --primary:      #7B2FFF;
+  --primary-hover:#9B3FFF;
+  --primary-dim:  rgba(123, 47, 255, 0.12);
+  --bg:           #08080C;
+  --surface:      #0e0e14;
+  --surface2:     #141420;
+  --surface3:     #1a1a28;
+  --surface4:     #20202f;
+  --border:       #23233a;
+  --border-hi:    #32324d;
+  --text:         #f0f0f8;
+  --text-sub:     #8888aa;
+  --text-dim:     #44445a;
+  --error:        #ff4545;
+  --success:      #00e676;
+  --font:         'Satoshi', system-ui, -apple-system, sans-serif;
+  --r-card:       1.35rem;
+  --r-input:      0.85rem;
+  --r-btn:        0.75rem;
+  --shadow:       0 24px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(123,47,255,0.08);
+  --sidebar-w:    280px;
+  --hue:          var(--primary);
+}
 
-/* buttons */
-.icon-button,.ibtn{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;color:var(--text-secondary);transition:background-color .2s,color .2s,transform .15s}
-.icon-button:hover,.ibtn:hover{background:var(--bg-hover);color:var(--text-primary)}
-.icon-button:active,.ibtn:active{transform:scale(.92)}
-.btn{min-height:44px;padding:0 1.25rem;border-radius:8px;background:var(--text-active);color:var(--bg-primary);font-weight:600;display:inline-flex;align-items:center;gap:.5rem;transition:opacity .2s,background-color .2s,transform .15s}
-.btn:hover{opacity:.9}.btn:active{transform:scale(.97)}
-.btn.ghost{background:none;border:1px solid var(--border-color);color:var(--text-primary)}
-.btn.ghost:hover{background:var(--bg-hover);opacity:1}
+/* ===================== RESET & BASE ===================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0; padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+[hidden] { display: none !important; }
+html {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  scroll-behavior: smooth;
+  height: 100%;
+}
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg);
+  overflow-x: hidden;
+  user-select: none;
+  position: relative;
+}
 
-/* boot */
-#boot{position:fixed;inset:0;z-index:3000;display:grid;place-items:center;background:var(--bg-primary)}
-.boot-in{display:flex;flex-direction:column;align-items:center;gap:1rem}
-.boot-in img{width:56px;height:56px;border-radius:16px;animation:pulse 1.6s ease-in-out infinite}
-.boot-in b{font-size:1.5rem;font-weight:700;letter-spacing:-.02em}
-.brand i{font-style:normal;color:var(--accent-2)}
-@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(130,170,255,.35)}50%{transform:scale(1.06);box-shadow:0 0 0 14px rgba(130,170,255,0)}}
-.typing-indicator{display:flex;align-items:center;gap:6px;color:var(--text-secondary);font-size:.9rem}
-.typing-indicator .dot{width:8px;height:8px;background:var(--text-secondary);border-radius:50%;animation:typing-bounce 1.2s infinite ease-in-out}
-.typing-indicator .dot:nth-child(2){animation-delay:.2s}
-.typing-indicator .dot:nth-child(3){animation-delay:.4s}
-.typing-indicator span.t{margin-left:6px}
-@keyframes typing-bounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
-.spin{width:28px;height:28px;border-radius:50%;border:3px solid rgba(255,255,255,.12);border-top-color:var(--text-active);animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+/* Grid overlay & ambient glow */
+body::before {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 70% 55% at 50% -5%, rgba(123,47,255,0.14) 0%, transparent 65%);
+}
 
-/* maintenance */
-#maint{min-height:100vh;display:grid;place-items:center;padding:1.25rem}
-.panel{width:100%;max-width:34rem;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;padding:clamp(1.5rem,5vw,2.5rem);text-align:center;box-shadow:0 25px 50px -12px rgba(0,0,0,.6);animation:pop .4s var(--ease)}
-.panel img{width:64px;height:64px;border-radius:16px}
-.panel h1{margin:1rem 0 .5rem;font-size:clamp(1.5rem,5vw,2rem);font-weight:700;letter-spacing:-.02em}
-.panel p{margin:0 0 1.25rem;color:var(--text-secondary);line-height:1.6}
-#cd{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin:0 0 1.5rem}
-#cd div{background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:8px;padding:.8rem .25rem}
-#cd b{display:block;font-size:clamp(1.4rem,6vw,2rem);font-weight:700;font-variant-numeric:tabular-nums;color:var(--text-active)}
-#cd span{font-size:.75rem;color:var(--text-secondary)}
-@keyframes pop{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; cursor: pointer; background: none; border: 0; }
+*:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 6px; }
 
-/* layout + sidebar */
-.app-container{display:flex;width:100%;min-height:100vh}
-.main-wrapper{flex:1;min-width:0;display:flex;flex-direction:column}
-#left-sidebar{position:fixed;top:0;left:0;height:100%;width:var(--sidebar-width);max-width:85%;background:var(--bg-secondary);border-right:1px solid var(--border-color);display:flex;flex-direction:column;z-index:1001;transform:translateX(-100%);transition:transform .3s ease-in-out;padding-top:env(safe-area-inset-top)}
-body.left-sidebar-open #left-sidebar{transform:none}
-.sidebar-content{padding:16px;display:flex;flex-direction:column;flex-grow:1;overflow-y:auto}
-.sidebar-header{display:flex;align-items:center;gap:.7rem;font-size:1.5rem;font-weight:700;letter-spacing:-.02em;padding:8px 12px;margin-bottom:20px}
-.sidebar-header img,.hbar .brand img{width:34px;height:34px;border-radius:10px}
-.sidebar-nav a,.sidebar-nav button{position:relative;display:flex;align-items:center;gap:14px;width:100%;padding:11px 12px;border-radius:8px;font-weight:500;color:var(--text-secondary);text-align:left;transition:background-color .2s,color .2s}
-.sidebar-nav a:hover,.sidebar-nav button:hover{background:var(--bg-hover);color:var(--text-primary)}
-.sidebar-nav a.active{background:var(--bg-tertiary);color:var(--text-primary)}
-.sidebar-nav a.active::before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:3px;background:var(--text-active)}
-.nav-label{padding:18px 12px 6px;font-size:.82rem;color:var(--text-secondary);opacity:.75}
-.dot-c{width:8px;height:8px;border-radius:50%;flex:none;margin:0 6px}
-kbd{margin-left:auto;font:inherit;font-size:.75rem;padding:1px 7px;border:1px solid var(--border-color);border-radius:6px;color:var(--text-secondary)}
-.sidebar-footer{margin-top:auto;padding-top:16px;border-top:1px solid var(--border-color)}
-.sidebar-footer .btn{width:100%;justify-content:center}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;z-index:1000}
-body.left-sidebar-open .overlay{opacity:1;visibility:visible}
-@media(max-width:1023px){body.left-sidebar-open{overflow:hidden}}
-@media(min-width:1024px){#left-sidebar{position:sticky;top:0;height:100vh;transform:none;flex:none;max-width:none}#menuBtn,.hbar .brand,.overlay{display:none}}
+/* ===================== RGB LOADER & KEYFRAMES ===================== */
+#pb-wrap { position: fixed; top: 0; left: 0; width: 100%; height: 3px; z-index: 99999; background: rgba(255,255,255,0.02); }
+#pb {
+  width: 0%; height: 100%;
+  background: linear-gradient(90deg, #ff004c, #ff7300, #ffe600, #00ff88, #00d4ff, #6600ff, #ff00bb, #ff004c);
+  background-size: 400% 100%;
+  animation: rgbMove 1.6s linear infinite;
+  box-shadow: 0 0 12px rgba(123,47,255,0.8);
+  transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes rgbMove { 0% { background-position: 0% 0%; } 100% { background-position: 400% 0%; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes scaleIn { 0% { opacity: 0; transform: scale(0.92); } 100% { opacity: 1; transform: scale(1); } }
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(250%); } }
+@keyframes toastIn { from { opacity: 0; transform: translate(-50%, 12px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes toastOut { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, 12px); } }
+@keyframes pop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: none; } }
 
-/* header + search */
-.main-header{position:sticky;top:0;z-index:100;background:rgba(23,24,26,.7);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border-color);padding:0 clamp(1rem,4vw,2rem)}
-.hbar{display:flex;align-items:center;gap:.6rem;min-height:4rem}
-.hbar .brand{display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:1.25rem;letter-spacing:-.02em}
-.grow{flex:1}
-.search-trigger{display:flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-radius:12px;background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--text-secondary);transition:border-color .2s,color .2s}
-.search-trigger:hover,.search-trigger[aria-expanded=true]{border-color:var(--text-active);color:var(--text-primary)}
-@media(min-width:1024px){.search-trigger{min-width:20rem}}
-@media(max-width:639px){.search-trigger span{display:none}.search-trigger kbd{display:none}.search-trigger{width:44px;padding:0;justify-content:center}}
-#sform{display:flex;align-items:center;gap:.5rem;padding:0 0 .8rem}
-#sform.open{animation:drop .25s var(--ease)}
-@keyframes drop{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
-.sbox{flex:1;position:relative;min-width:0}
-.sbox input{width:100%;height:48px;padding:0 3rem 0 1rem;border-radius:12px;border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-primary);font:inherit;font-size:1rem;appearance:none;-webkit-appearance:none;transition:border-color .2s,box-shadow .2s}
-.sbox input::-webkit-search-cancel-button{display:none}
-.sbox input::placeholder{color:#6f7787}
-.sbox input:focus{outline:none;border-color:var(--text-active);box-shadow:0 0 0 3px rgba(130,170,255,.2)}
-.sbox .ibtn{position:absolute;right:2px;top:2px;width:44px;height:44px}
+/* ===================== BUTTONS & CONTROLS ===================== */
+.btn {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #9B3FFF 0%, #6615FF 60%, #4400DD 100%);
+  color: #fff;
+  border: none;
+  border-radius: var(--r-btn);
+  font-weight: 800;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(123,47,255,0.35), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: transform 0.18s cubic-bezier(0.175,0.885,0.32,1.275), box-shadow 0.18s, opacity 0.18s;
+}
+.btn:hover { opacity: 0.95; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(123,47,255,0.55); }
+.btn:active { transform: scale(0.96); }
+.btn .shim {
+  position: absolute; top: 0; left: 0; width: 35%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  animation: shimmer 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+.btn.ghost {
+  background: var(--surface3);
+  border: 1px solid var(--border-hi);
+  color: var(--text-sub);
+  box-shadow: none;
+}
+.btn.ghost:hover {
+  background: var(--surface4);
+  border-color: var(--primary);
+  color: var(--text);
+  transform: translateY(-1px);
+}
 
-/* hero */
-.home-header{padding:1.75rem 0 1.1rem}
-.home-header h2{margin:0 0 .4rem;font-size:clamp(1.9rem,5vw,2.75rem);font-weight:800;letter-spacing:-.03em;line-height:1.08}
-.home-header p{margin:0;color:var(--text-secondary);font-size:1.05rem}
-.hero{padding:0 0 .25rem}
-.rail{display:flex;gap:.9rem;list-style:none;margin:0 calc(-1*clamp(1rem,4vw,2rem));padding:0 clamp(1rem,4vw,2rem) .6rem;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 clamp(1rem,4vw,2rem);scrollbar-width:none;-webkit-overflow-scrolling:touch}
-.rail::-webkit-scrollbar{display:none}
-.rail li{flex:0 0 min(92%,38rem);scroll-snap-align:start}
-.slide,.card{position:relative;overflow:hidden;text-decoration:none}
-.slide>*,.card>*{position:relative}
-.slide::before,.card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .3s;background:radial-gradient(260px circle at var(--mx,50%) var(--my,0%),color-mix(in srgb,var(--hue) 24%,transparent),transparent 70%)}
-.slide{display:flex;align-items:center;gap:clamp(.9rem,3vw,1.75rem);height:100%;min-height:13rem;padding:1.25rem;border-radius:16px;border:1px solid var(--border-color);background:radial-gradient(120% 150% at 0 0,color-mix(in srgb,var(--hue) 20%,var(--bg-secondary)) 0,var(--bg-secondary) 62%);transition:border-color .2s,transform .3s var(--ease)}
-.slide:active{transform:scale(.99)}
-.slide .icon{width:clamp(6.5rem,28vw,9rem);flex:none;margin:0}
-.slide .info{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:.45rem}
-.slide h3{margin:0;font-size:clamp(1.3rem,5vw,1.9rem);font-weight:800;letter-spacing:-.02em;line-height:1.15}
-.slide p{margin:0;color:var(--text-secondary);font-size:.92rem;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ico-btn {
+  width: 36px; height: 36px;
+  background: var(--surface2);
+  border: 1px solid var(--border-hi);
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-sub);
+  transition: all 0.18s;
+  flex-shrink: 0;
+}
+.ico-btn:hover {
+  background: var(--surface3);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+.ico-btn:active { transform: scale(0.92); }
 
-/* catalogue */
-.cat{padding:1.5rem 0 .25rem;scroll-margin-top:5rem}
-.cat h2{display:flex;align-items:baseline;gap:.5rem;margin:0 0 1rem;padding-left:.75rem;border-left:3px solid var(--hue);font-size:1.2rem;font-weight:700}
-.cat h2 small{color:var(--text-secondary);font-size:.85rem;font-weight:500}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.75rem;list-style:none;margin:0;padding:0}
-@media(min-width:520px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(min-width:760px){.grid{grid-template-columns:repeat(auto-fill,minmax(11rem,1fr));gap:1rem}}
-.card{display:flex;flex-direction:column;align-items:center;gap:.35rem;height:100%;padding:1.1rem .75rem 1rem;text-align:center;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:12px;transition:transform .3s var(--ease),border-color .2s,background-color .2s,box-shadow .3s}
-.card:active{transform:scale(.97)}
-.icon{position:relative;width:min(100%,5.5rem);aspect-ratio:1;margin-bottom:.4rem;border-radius:26%;background:var(--bg-code);border:3px solid var(--bg-tertiary);overflow:hidden;transition:transform .35s var(--ease)}
-.icon svg,.icon img{position:absolute;inset:0;width:100%;height:100%;display:block}
-.icon img{object-fit:cover;opacity:0;transition:opacity .3s}
-.icon img.ok{opacity:1}
-.card h3{margin:0;max-width:100%;font-size:1rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pub{max-width:100%;padding:2px 10px;border-radius:99px;font-size:.76rem;font-weight:500;color:var(--hue);background:color-mix(in srgb,var(--hue) 12%,transparent);border:1px solid color-mix(in srgb,var(--hue) 28%,transparent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.desc{margin:.25rem 0 .5rem;max-width:100%;color:var(--text-secondary);font-size:.8rem;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.pill{display:inline-flex;align-items:center;gap:6px;margin-top:auto;padding:.4rem 1rem;border-radius:8px;background:var(--bg-tertiary);border:1px solid var(--border-color);font-weight:600;font-size:.9rem;transition:background-color .2s,color .2s,border-color .2s}
-.slide .pill{margin-top:.4rem}
-@media(hover:hover){
-.card:hover,.slide:hover{border-color:color-mix(in srgb,var(--hue) 55%,var(--border-color))}
-.card:hover{transform:translateY(-4px);background:#25282c;box-shadow:0 14px 30px -12px rgba(0,0,0,.7)}
-.card:hover::before,.slide:hover::before{opacity:1}
-.card:hover .icon{transform:scale(1.06) rotate(-2deg)}
-.card:hover .pill,.slide:hover .pill{background:var(--hue);border-color:var(--hue);color:var(--bg-primary)}}
-.card:focus-visible .pill,.slide:focus-visible .pill{background:var(--hue);border-color:var(--hue);color:var(--bg-primary)}
+/* SVG Icons */
+.i { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* loading */
-.slide[aria-busy=true] .icon::after,.card[aria-busy=true] .icon::after{content:"";position:absolute;inset:0;background:rgba(16,18,20,.7)}
-.slide[aria-busy=true] .icon::before,.card[aria-busy=true] .icon::before{content:"";position:absolute;z-index:2;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:3px solid rgba(255,255,255,.2);border-top-color:var(--text-active);animation:spin .8s linear infinite}
-.skel{aspect-ratio:3/4.3;border-radius:12px;background:linear-gradient(100deg,var(--bg-secondary) 30%,var(--bg-tertiary) 50%,var(--bg-secondary) 70%) 0 0/200% 100%;border:1px solid var(--border-color);animation:sh 1.4s linear infinite}
-.skel-hero{aspect-ratio:auto;min-height:13rem;border-radius:16px}
-@keyframes sh{to{background-position:-200% 0}}
-@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-.reveal .rail>li,.reveal .grid>li{animation:rise .6s var(--ease) both;animation-delay:calc(var(--i,0)*50ms)}
+/* ===================== BOOT / SPLASH ===================== */
+#boot {
+  position: fixed; inset: 0; z-index: 10000;
+  display: grid; place-items: center;
+  background: var(--bg);
+  transition: opacity 0.4s ease, visibility 0.4s;
+}
+#boot.out { opacity: 0; visibility: hidden; pointer-events: none; }
+.boot-card {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  animation: scaleIn 0.5s ease both;
+}
+.boot-logo {
+  width: 58px; height: 58px; border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(123,47,255,0.5), 0 0 0 1px rgba(123,47,255,0.3);
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+  background: var(--surface2);
+}
+.boot-logo img { width: 100%; height: 100%; object-fit: cover; }
+.boot-card h1 { font-size: 1.6rem; font-weight: 900; letter-spacing: -0.03em; }
+.boot-card h1 span { color: var(--primary); }
 
-/* states */
-.state{margin:2rem 0;padding:2rem 1.25rem;text-align:center;background:var(--bg-secondary);border:1px dashed var(--border-color);border-radius:12px}
-.state h2{margin:0 0 .4rem;font-size:1.2rem}
-.state p{margin:0 0 1rem;color:var(--text-secondary);line-height:1.6}
-.state p:last-child{margin:0}
-#devwarn{margin:1rem 0;padding:.9rem 1rem;border-radius:8px;background:rgba(255,203,107,.08);border:1px solid rgba(255,203,107,.35);color:#ffcb6b;font-size:.85rem}
-#devwarn ul{margin:.4rem 0 0;padding-left:1.1rem}
-#net,#toast{position:fixed;left:50%;transform:translateX(-50%);z-index:2500;animation:toastin .35s var(--ease)}
-#net{bottom:1rem;background:rgba(255,138,128,.12);border:1px solid rgba(255,138,128,.4);color:var(--error-color);padding:.6rem 1rem;border-radius:99px;font-size:.85rem;backdrop-filter:blur(8px)}
-#toast{bottom:4.5rem;max-width:calc(100% - 2rem);background:var(--bg-tertiary);border:1px solid var(--border-color);border-left:3px solid var(--text-active);padding:.8rem 1.1rem;border-radius:8px;font-size:.9rem;box-shadow:0 10px 30px rgba(0,0,0,.5)}
-@keyframes toastin{from{opacity:0;transform:translate(-50%,14px)}to{opacity:1;transform:translate(-50%,0)}}
-footer{margin-top:3rem;padding:1.5rem 0 2.5rem;border-top:1px solid var(--border-color);color:var(--text-secondary);font-size:.85rem}
-dialog{width:min(92vw,26rem);background:var(--bg-secondary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:12px;padding:24px}
-dialog[open]{animation:pop .3s var(--ease)}
-dialog::backdrop{background:rgba(0,0,0,.6);backdrop-filter:blur(2px)}
-dialog h2{margin:0 0 .6rem;font-size:1.25rem;font-weight:600}
-dialog ol{margin:0 0 1.25rem;padding-left:1.2rem;color:var(--text-secondary);line-height:1.7}
+.pill-status {
+  background: var(--primary-dim); border: 1px solid rgba(123,47,255,0.25);
+  color: var(--primary); font-size: 0.72rem; font-weight: 800;
+  padding: 4px 14px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.1em;
+}
 
-/* v2: icon pack, mobile nav, tablet/desktop polish */
-#boot{transition:opacity .35s}#boot.out{opacity:0;pointer-events:none}
-.ci{display:inline-flex;flex:none}
-.cat h2{align-items:center}
-.main-header{transition:box-shadow .3s}
-.main-header.scrolled{box-shadow:0 8px 24px -12px rgba(0,0,0,.8)}
-.dots{display:flex;justify-content:center;gap:6px;padding:.1rem 0 .4rem}
-.dots span{width:6px;height:6px;border-radius:99px;background:var(--bg-hover);transition:width .3s var(--ease),background-color .3s}
-.dots span.on{width:20px;background:var(--text-active)}
-.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:900;display:flex;gap:4px;padding:6px 10px calc(6px + env(safe-area-inset-bottom));background:rgba(32,34,37,.84);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--border-color)}
-.bottom-nav button{flex:1;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:10px;font-size:.72rem;font-weight:500;color:var(--text-secondary);transition:color .2s,background-color .2s,transform .15s}
-.bottom-nav button:active{transform:scale(.92);background:var(--bg-hover);color:var(--text-primary)}
-@media(min-width:640px){.rail li{flex-basis:calc(50% - .45rem)}}
-@media(min-width:1024px){.bottom-nav{display:none}}
-@media(max-width:1023px){.main-wrapper{padding-bottom:calc(4.5rem + env(safe-area-inset-bottom))}#net{bottom:calc(5.25rem + env(safe-area-inset-bottom))}#toast{bottom:calc(8.5rem + env(safe-area-inset-bottom))}}
-@media(max-height:500px) and (orientation:landscape){.home-header{padding:.9rem 0 .6rem}.slide{min-height:10rem}.hbar{min-height:3.25rem}}
-@media(hover:none){.card:active{background:#25282c;border-color:color-mix(in srgb,var(--hue) 55%,var(--border-color))}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* ===================== MAINTENANCE SCREEN ===================== */
+#maint {
+  min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; padding: 20px;
+  position: relative; z-index: 10;
+}
+.maint-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-card); padding: 32px 24px; max-width: 420px; width: 100%;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 16px; box-shadow: var(--shadow); position: relative; animation: pop .4s ease;
+}
+.maint-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(123,47,255,0.6) 50%, transparent);
+}
+.maint-card img { width: 64px; height: 64px; border-radius: 16px; box-shadow: 0 4px 18px rgba(123,47,255,0.4); }
+.maint-card h1 { font-size: 1.45rem; font-weight: 900; letter-spacing: -0.02em; }
+.maint-card p { color: var(--text-sub); font-size: 0.88rem; line-height: 1.5; font-weight: 500; }
+#cd { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; width: 100%; }
+#cd div {
+  background: var(--surface2); border: 1px solid var(--border-hi);
+  border-radius: var(--r-input); padding: 10px 4px;
+}
+#cd b { display: block; font-size: 1.3rem; font-weight: 900; color: var(--primary); font-variant-numeric: tabular-nums; }
+#cd span { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; font-weight: 700; }
+
+/* ===================== LAYOUT & SIDEBAR ===================== */
+.app-container {
+  display: flex; width: 100%; min-height: 100vh; position: relative; z-index: 1;
+}
+.main-wrapper {
+  flex: 1; min-width: 0; display: flex; flex-direction: column;
+}
+
+#left-sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: var(--sidebar-w); max-width: 85%;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; z-index: 2000;
+  transform: translateX(-100%);
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  padding: 20px 16px;
+}
+body.left-sidebar-open #left-sidebar { transform: translateX(0); }
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  z-index: 1999; display: none;
+}
+body.left-sidebar-open .overlay { display: block; }
+
+.side-brand {
+  display: flex; align-items: center; gap: 11px; padding-bottom: 20px;
+  border-bottom: 1px solid var(--border); margin-bottom: 16px;
+}
+.side-brand img {
+  width: 34px; height: 34px; border-radius: 9px;
+  box-shadow: 0 4px 16px rgba(123,47,255,0.4);
+}
+.side-brand span { font-size: 1.25rem; font-weight: 900; letter-spacing: -0.02em; }
+.side-brand span i { font-style: normal; color: var(--primary); }
+
+.side-nav { display: flex; flex-direction: column; gap: 6px; flex: 1; overflow-y: auto; }
+.side-link {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; border-radius: var(--r-input);
+  background: transparent; color: var(--text-sub);
+  font-weight: 700; font-size: 0.86rem; transition: all 0.18s;
+  border: 1px solid transparent;
+}
+.side-link:hover {
+  background: var(--surface2); color: var(--text); border-color: var(--border-hi);
+  transform: translateX(2px);
+}
+.side-link.active {
+  background: var(--primary-dim); border-color: rgba(123,47,255,0.35);
+  color: var(--primary);
+}
+.side-label {
+  font-size: 0.64rem; font-weight: 800; color: var(--primary);
+  text-transform: uppercase; letter-spacing: 0.14em;
+  padding: 16px 14px 6px;
+}
+
+@media(min-width: 1024px) {
+  #left-sidebar {
+    position: sticky; top: 0; height: 100vh;
+    transform: none; flex-shrink: 0;
+  }
+  .overlay, #menuBtn { display: none !important; }
+}
+
+/* ===================== HEADER & SEARCH ===================== */
+.main-header {
+  position: sticky; top: 0; z-index: 1000;
+  background: rgba(14, 14, 20, 0.85);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px;
+}
+.hbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.grow { flex: 1; }
+
+.search-wrap {
+  position: relative; width: 100%; max-width: 380px;
+}
+.s-icon {
+  position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+  color: var(--text-dim); pointer-events: none; display: flex; align-items: center;
+  transition: color 0.2s;
+}
+.search-wrap:focus-within .s-icon { color: var(--primary); }
+.input-box {
+  width: 100%; background: #09090b;
+  border: 1.5px solid var(--border); border-radius: var(--r-input);
+  padding: 10px 38px 10px 38px;
+  color: var(--text); font-family: var(--font); font-size: 0.88rem; font-weight: 500;
+  outline: none; transition: all 0.2s; cursor: text;
+}
+.input-box:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(123,47,255,0.25), 0 0 18px rgba(123,47,255,0.1);
+}
+.s-clear {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  color: var(--text-dim); display: none; align-items: center;
+}
+.s-clear.vis { display: flex; }
+.s-clear:hover { color: var(--text); }
+
+/* ===================== MAIN CONTENT WRAPPER ===================== */
+.wrap {
+  width: 100%; max-width: 1280px; margin: 0 auto;
+  padding: 28px 24px 60px;
+}
+
+/* Hero section */
+.hero-box {
+  display: flex; flex-direction: column; gap: 6px; margin-bottom: 24px;
+}
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+  color: var(--primary); letter-spacing: 0.12em;
+}
+.hero-box h2 {
+  font-size: clamp(1.8rem, 4vw, 2.5rem); font-weight: 900; letter-spacing: -0.03em;
+}
+.hero-box p {
+  color: var(--text-sub); font-size: 0.95rem; font-weight: 500;
+}
+
+/* Featured Horizontal Rail */
+.rail {
+  display: flex; gap: 14px; list-style: none;
+  overflow-x: auto; scroll-snap-type: x mandatory;
+  padding-bottom: 12px; margin-bottom: 8px;
+  scrollbar-width: none;
+}
+.rail::-webkit-scrollbar { display: none; }
+.rail li {
+  flex: 0 0 min(90%, 460px); scroll-snap-align: start;
+}
+
+.slide-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  padding: 20px;
+  display: flex; align-items: center; gap: 18px;
+  box-shadow: var(--shadow);
+  position: relative; overflow: hidden;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.slide-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(123,47,255,0.6) 50%, transparent);
+}
+.slide-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.85), 0 0 25px rgba(123,47,255,0.22);
+}
+
+/* Banner Image display styling */
+.slide-thumb {
+  width: 90px; height: 90px; border-radius: 14px;
+  background: var(--surface2); border: 1px solid var(--border-hi);
+  overflow: hidden; flex-shrink: 0; position: relative;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+}
+.slide-thumb svg, .slide-thumb img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+}
+.slide-thumb img { opacity: 0; transition: opacity .25s ease; }
+.slide-thumb img.ok { opacity: 1; }
+
+.slide-info { display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
+.slide-info h3 { font-size: 1.2rem; font-weight: 800; color: #fff; }
+.slide-info p {
+  color: var(--text-sub); font-size: 0.82rem; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+/* Dots indicator */
+.dots { display: flex; justify-content: center; gap: 6px; padding: 4px 0 24px; }
+.dots span {
+  width: 6px; height: 6px; border-radius: 999px; background: var(--surface3);
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s;
+}
+.dots span.on { width: 20px; background: var(--primary); }
+
+/* Dev Warning Banner */
+#devwarn {
+  margin: 0 0 20px; padding: 12px 16px; border-radius: var(--r-input);
+  background: rgba(255, 203, 107, 0.08); border: 1px solid rgba(255, 203, 107, 0.3);
+  color: #ffcb6b; font-size: 0.82rem; line-height: 1.5;
+}
+#devwarn ul { margin: 6px 0 0 16px; }
+
+/* Offline Network Bar */
+#net {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: rgba(255, 69, 69, 0.15); border: 1px solid rgba(255, 69, 69, 0.35);
+  color: var(--error); padding: 8px 18px; border-radius: 999px; font-size: 0.78rem;
+  font-weight: 700; z-index: 2500; backdrop-filter: blur(10px);
+}
+
+/* ===================== CATEGORY & GAME GRID ===================== */
+.sec-head {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px; margin-top: 24px;
+}
+.sec-title {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.72rem; font-weight: 800; color: var(--primary);
+  text-transform: uppercase; letter-spacing: 0.14em; white-space: nowrap;
+}
+.sec-rule { flex: 1; height: 1px; background: var(--border); }
+.count-pill {
+  background: var(--primary-dim); color: var(--primary);
+  font-size: 0.65rem; font-weight: 800; padding: 2px 8px; border-radius: 999px;
+  border: 1px solid rgba(123,47,255,0.25);
+}
+
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media(min-width: 600px) { .games-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; } }
+@media(min-width: 900px) { .games-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; } }
+
+.game-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  padding: 16px 14px 14px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  position: relative; overflow: hidden; cursor: pointer;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.6);
+  transition: all 0.22s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+.game-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(123,47,255,0.4) 50%, transparent);
+}
+.game-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 45px rgba(0,0,0,0.8), 0 0 20px rgba(123,47,255,0.2);
+}
+.game-card:active { transform: scale(0.97); }
+
+.game-icon-box {
+  width: 72px; height: 72px; border-radius: 16px;
+  background: var(--surface2); border: 1px solid var(--border-hi);
+  overflow: hidden; margin-bottom: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  transition: transform 0.28s;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.game-card:hover .game-icon-box {
+  transform: scale(1.08) rotate(3deg);
+}
+.game-icon-box svg, .game-icon-box img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+}
+.game-icon-box img { opacity: 0; transition: opacity .25s ease; }
+.game-icon-box img.ok { opacity: 1; }
+
+.game-card h4 {
+  font-size: 0.95rem; font-weight: 800; color: var(--text);
+  margin-bottom: 3px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.game-tag {
+  font-size: 0.65rem; font-weight: 700; color: var(--text-sub);
+  background: var(--surface2); padding: 2px 8px; border-radius: 6px;
+  border: 1px solid var(--border); margin-bottom: 8px;
+}
+.game-card p {
+  font-size: 0.74rem; color: var(--text-dim); line-height: 1.35;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.game-btn {
+  width: 100%; margin-top: auto; padding: 8px;
+  border-radius: var(--r-btn);
+  background: var(--surface2); border: 1px solid var(--border-hi);
+  font-size: 0.78rem; font-weight: 800; color: var(--text-sub);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all 0.18s;
+}
+.game-card:hover .game-btn {
+  background: linear-gradient(135deg, #9B3FFF 0%, #6615FF 100%);
+  color: #fff; border-color: transparent;
+  box-shadow: 0 4px 14px rgba(123,47,255,0.4);
+}
+
+/* ===================== TOAST ===================== */
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  background: var(--surface2); border: 1px solid var(--border-hi);
+  border-radius: 999px; padding: 10px 20px 10px 14px;
+  font-size: 0.8rem; font-weight: 700; color: var(--text);
+  white-space: nowrap; z-index: 99998; pointer-events: none;
+  display: none; align-items: center; gap: 8px;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.8);
+}
+.tdot { width: 7px; height: 7px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 8px var(--primary); }
+#toast.show { display: flex; animation: toastIn 0.25s both; }
+#toast.hiding { animation: toastOut 0.25s both; }
+#toast.error .tdot { background: var(--error); box-shadow: 0 0 8px var(--error); }
+#toast.error { border-color: rgba(255,69,69,0.3); }
+
+/* ===================== SKELETON LOADERS ===================== */
+.skel-card {
+  height: 210px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-card);
+  position: relative; overflow: hidden;
+}
+.skel-card::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+  animation: shimmer 1.8s infinite;
+}
+
+/* ===================== DIALOG (iOS INSTALL) ===================== */
+dialog#iosDlg {
+  width: min(90vw, 360px);
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border-hi); border-radius: var(--r-card);
+  padding: 24px; margin: auto; box-shadow: var(--shadow);
+}
+dialog#iosDlg::backdrop { background: rgba(0,0,0,0.72); backdrop-filter: blur(10px); }
+dialog#iosDlg h2 { font-size: 1.15rem; font-weight: 800; margin-bottom: 12px; }
+dialog#iosDlg ol { padding-left: 20px; font-size: 0.85rem; color: var(--text-sub); line-height: 1.6; margin-bottom: 18px; }
+dialog#iosDlg .btn { width: 100%; }
+
+/* ===================== MOBILE BOTTOM NAV ===================== */
+.bottom-nav {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000;
+  background: rgba(14, 14, 20, 0.9);
+  backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  border-top: 1px solid var(--border);
+  display: flex; gap: 4px; padding: 6px 12px calc(8px + env(safe-area-inset-bottom));
+}
+.bottom-nav button {
+  flex: 1; min-height: 48px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  border-radius: 10px; font-size: 0.68rem; font-weight: 700; color: var(--text-sub);
+}
+.bottom-nav button:active { background: var(--surface3); color: var(--text); }
+@media(min-width: 1024px) { .bottom-nav { display: none; } }
+@media(max-width: 1023px) { .main-wrapper { padding-bottom: 70px; } }
 </style>
 </head>
 <body>
 
+<!-- Progress Bar -->
+<div id="pb-wrap"><div id="pb"></div></div>
+
+<!-- Global SVGs -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
   <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
   <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
   <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
   <symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 3v12m0 0-4-4m4 4 4-4M5 21h14"/></symbol>
-  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></symbol>
   <symbol id="i-gamepad" viewBox="0 0 24 24"><path d="M6 12h4M8 10v4"/><path d="M15 13h.01M18 11h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-3.9 3.2l-1.6 7.6A2.5 2.5 0 0 0 3.6 19c.7 0 1.3-.4 1.7-1l1.2-2h11l1.2 2c.4.6 1 1 1.7 1a2.5 2.5 0 0 0 2.4-3.2l-1.6-7.6A4 4 0 0 0 17.3 5z"/></symbol>
   <symbol id="i-dice" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8.5 8.5h.01M15.5 8.5h.01M12 12h.01M8.5 15.5h.01M15.5 15.5h.01"/></symbol>
   <symbol id="i-crown" viewBox="0 0 24 24"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5z"/></symbol>
   <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12h.01"/></symbol>
   <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></symbol>
-  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></symbol>
-  <symbol id="i-wifi-off" viewBox="0 0 24 24"><path d="M2 2l20 20M8.5 16.4a5 5 0 0 1 7 0M2 8.8a15 15 0 0 1 4.2-2.6M10.7 5.1A15 15 0 0 1 22 8.8M5 12.9a10 10 0 0 1 5.2-2.7M15 11a10 10 0 0 1 4 1.9M12 20h.01"/></symbol>
-  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></symbol>
-  <symbol id="i-back" viewBox="0 0 24 24"><path d="M19 12H5m6-6-6 6 6 6"/></symbol>
-  <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2 5-5 2 2-5z"/></symbol>
-  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></symbol>
-  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
-
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="m12 3 2.5 5 5 2.5-5 2.5-2.5 5-2.5-5-5-2.5 5-2.5z"/></symbol>
 </svg>
 
-<div id="boot" role="status"><div class="boot-in"><img src="favicon.png" alt="" width="56" height="56"><b class="brand">Gamey<i>Fi</i></b><span class="typing-indicator"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="t">Loading</span></span></div></div>
-<noscript><div class="wrap"><div class="state"><h1>JavaScript is required</h1><p>GameyFi needs JavaScript to list and open games. Enable it and reload the page.</p></div></div></noscript>
+<!-- Toast -->
+<div id="toast"><div class="tdot"></div><span id="toast-txt"></span></div>
+<div id="net" hidden role="status">You're offline. Some games may still work from cache.</div>
 
-<!-- Maintenance screen -->
-<main id="maint" hidden>
-  <div class="panel">
-    <img src="icons/icon-192.png" alt="" width="64" height="64">
-    <h1>Under maintenance</h1>
-    <p id="maintMsg"></p>
-    <div id="cd" role="timer" aria-label="Time until maintenance ends" hidden>
-      <div><b id="cdD">0</b><span>days</span></div><div><b id="cdH">00</b><span>hours</span></div>
-      <div><b id="cdM">00</b><span>minutes</span></div><div><b id="cdS">00</b><span>seconds</span></div>
+<!-- Boot Screen -->
+<div id="boot" role="status">
+  <div class="boot-card">
+    <div class="boot-logo">
+      <img src="favicon.png" alt="GameyFi">
     </div>
-    <button class="btn" id="recheck" type="button">Check again</button>
-  </div>
-</main>
-
-<!-- Homepage -->
-<div id="app" class="app-container" hidden>
-  <aside id="left-sidebar" aria-label="Menu">
-    <div class="sidebar-content">
-      <a class="sidebar-header brand" href="./" aria-label="GameyFi home"><img src="favicon.png" alt="" width="34" height="34"><span>Gamey<i>Fi</i></span></a>
-      <nav class="sidebar-nav" aria-label="Browse">
-        <a href="#top" id="navAll" class="active"><svg class="i"><use href="#i-home"/></svg>All games</a>
-        <button type="button" id="navSearch"><svg class="i"><use href="#i-search"/></svg>Search<kbd>/</kbd></button>
-        <div class="nav-label">Categories</div>
-        <div id="navCats"></div>
-      </nav>
-      <div class="sidebar-footer">
-        <button class="btn" id="installBtn" type="button" hidden><svg class="i"><use href="#i-dl"/></svg>Install app</button>
-      </div>
-    </div>
-  </aside>
-  <div class="overlay" id="overlay"></div>
-  <nav class="bottom-nav" aria-label="Quick navigation">
-    <button type="button" id="bnHome"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg><span>Home</span></button>
-    <button type="button" id="bnSearch"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><span>Search</span></button>
-    <button type="button" id="bnMenu"><svg class="i" aria-hidden="true"><use href="#i-grid"/></svg><span>Browse</span></button>
-  </nav>
-
-  <div class="main-wrapper" id="top">
-    <header class="main-header">
-      <div class="hbar">
-        <button class="icon-button" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="left-sidebar"><svg class="i"><use href="#i-menu"/></svg></button>
-        <a class="brand" href="./" aria-label="GameyFi home"><img src="favicon.png" alt="" width="34" height="34"><span>Gamey<i>Fi</i></span></a>
-        <span class="grow"></span>
-        <button class="search-trigger" id="searchBtn" type="button" aria-label="Search games" aria-expanded="false" aria-controls="sform"><svg class="i"><use href="#i-search"/></svg><span>Search games</span><kbd>/</kbd></button>
-      </div>
-      <form id="sform" role="search" hidden>
-        <label class="sr" for="q">Search games</label>
-        <div class="sbox">
-          <input id="q" type="search" placeholder="Search by name, description or category" autocomplete="off" enterkeyhint="search" maxlength="80">
-          <button class="ibtn" id="clearBtn" type="button" aria-label="Clear search" hidden><svg class="i"><use href="#i-x"/></svg></button>
-        </div>
-        <button class="btn ghost" id="closeBtn" type="button" aria-label="Close search">Close</button>
-      </form>
-    </header>
-
-    <main class="wrap" id="main">
-      <section class="hero" id="hero" aria-label="Featured games">
-        <div class="home-header"><h2>Pick a game and play</h2><p id="heroSub">Board games and table sports in your browser.</p></div>
-        <ul class="rail" id="rail"></ul>
-        <div class="dots" id="dots" aria-hidden="true"></div>
-      </section>
-      <div id="devwarn" hidden></div>
-      <p class="sr" id="live" role="status" aria-live="polite"></p>
-      <div id="content" aria-busy="true"></div>
-    </main>
-    <footer><div class="wrap">GameyFi</div></footer>
+    <h1>Gamey<span>Fi</span></h1>
+    
   </div>
 </div>
 
-<div id="net" hidden role="status">You're offline. Some things may not load.</div>
-<div id="toast" hidden role="alert"></div>
+<noscript>
+  <div class="wrap" style="text-align:center; padding-top:40px;">
+    <h2>JavaScript is required</h2>
+    <p style="color:var(--text-sub); margin-top:8px;">Enable JavaScript to list and open games.</p>
+  </div>
+</noscript>
 
+<!-- Maintenance Screen -->
+<main id="maint" hidden>
+  <div class="maint-card">
+    <img src="icons/icon-192.png" alt="">
+    <h1>Under Maintenance</h1>
+    <p id="maintMsg">GameyFi is undergoing scheduled maintenance. Please check back soon.</p>
+    <div id="cd" role="timer" aria-label="Maintenance countdown" hidden>
+      <div><b id="cdD">0</b><span>days</span></div>
+      <div><b id="cdH">00</b><span>hours</span></div>
+      <div><b id="cdM">00</b><span>mins</span></div>
+      <div><b id="cdS">00</b><span>secs</span></div>
+    </div>
+    <button class="btn" id="recheck" type="button">
+      <span class="shim"></span>Check Again
+    </button>
+  </div>
+</main>
+
+<!-- ==================== APP LAYOUT ==================== -->
+<div class="app-container" id="app" hidden>
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Left Sidebar -->
+  <aside id="left-sidebar">
+    <a class="side-brand" href="./">
+      <img src="favicon.png" alt="GameyFi">
+      <span>Gamey<i>Fi</i></span>
+    </a>
+    <nav class="side-nav">
+      <a href="#top" class="side-link active" id="navAll">
+        <svg class="i"><use href="#i-home"/></svg>
+        All Games
+      </a>
+      <div class="side-label">Categories</div>
+      <div id="navCats" style="display:flex; flex-direction:column; gap:4px;"></div>
+    </nav>
+    <div style="padding-top:16px; border-top:1px solid var(--border);">
+      <button class="btn" style="width:100%;" id="installBtn" type="button" hidden>
+        <span class="shim"></span>
+        <svg class="i"><use href="#i-dl"/></svg>
+        Install App
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main View -->
+  <div class="main-wrapper" id="top">
+    <header class="main-header">
+      <div class="hbar">
+        <button class="ico-btn" id="menuBtn" type="button" aria-label="Open menu">
+          <svg class="i"><use href="#i-menu"/></svg>
+        </button>
+        <form class="search-wrap" id="sform" role="search" onsubmit="event.preventDefault();">
+          <span class="s-icon">
+            <svg class="i"><use href="#i-search"/></svg>
+          </span>
+          <input id="q" class="input-box" type="search" placeholder="Search games or category…" spellcheck="false" autocomplete="off" enterkeyhint="search" maxlength="80">
+          <button class="s-clear" id="clearBtn" type="button" aria-label="Clear search">
+            <svg class="i"><use href="#i-x"/></svg>
+          </button>
+        </form>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <!-- Hero Banner -->
+      <section id="heroSection">
+        <div class="hero-box">
+          <span class="hero-tag">
+            <svg class="i" style="width:13px; height:13px;" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Instant Play Suite
+          </span>
+          <h2>Pick a game and launch.</h2>
+          <p id="heroSub">Board games and table sports in your browser.</p>
+        </div>
+        <ul class="rail" id="rail"></ul>
+        <div class="dots" id="dots" aria-hidden="true"></div>
+      </section>
+
+      <!-- Dev Warnings -->
+      <div id="devwarn" hidden></div>
+      <p class="sr" id="live" role="status" aria-live="polite"></p>
+
+      <!-- Dynamic Content -->
+      <div id="content" aria-busy="true"></div>
+    </main>
+  </div>
+</div>
+
+<!-- Mobile Bottom Navigation -->
+<nav class="bottom-nav">
+  <button type="button" id="bnHome">
+    <svg class="i"><use href="#i-home"/></svg>
+    <span>Home</span>
+  </button>
+  <button type="button" id="bnSearch">
+    <svg class="i"><use href="#i-search"/></svg>
+    <span>Search</span>
+  </button>
+  <button type="button" id="bnMenu">
+    <svg class="i"><use href="#i-menu"/></svg>
+    <span>Categories</span>
+  </button>
+</nav>
+
+<!-- iOS Install Help Dialog -->
 <dialog id="iosDlg">
   <h2>Install GameyFi</h2>
-  <ol><li>Tap the Share button in Safari.</li><li>Choose Add to Home Screen.</li><li>Tap Add.</li></ol>
-  <button class="btn" id="iosOk" type="button">Got it</button>
+  <ol>
+    <li>Tap the <strong>Share</strong> button in Safari.</li>
+    <li>Choose <strong>Add to Home Screen</strong>.</li>
+    <li>Tap <strong>Add</strong>.</li>
+  </ol>
+  <button class="btn" id="iosOk" type="button"><span class="shim"></span>Got it</button>
 </dialog>
 
 <script>
 (function(){
 'use strict';
 
-/* ---------- Configuration ---------- */
-// Category labels. Keys are the numeric ids used in games.json.
-// games.json may also contain a top-level "categories" object that overrides these.
-var CATEGORY_LABELS = {1:'Board games',2:'Strategy',3:'Table sports'};
-var FALLBACK_LABEL = 'Category';              // used when an id has no label
-var HUES = ['#82aaff','#c792ea','#7fdbca','#ffcb6b']; // cycle for category accents
+/* ---------- Config & State ---------- */
+var DEFAULT_CATEGORY_LABELS = { 1: 'Board Games', 2: 'Strategy', 3: 'Table Sports' };
+var CAT_ICONS = {
+  1: 'i-dice', 
+  2: 'i-crown', 
+  3: 'i-target',
+  'board': 'i-dice',
+  'strategy': 'i-crown',
+  'sports': 'i-target',
+  'table': 'i-target'
+};
+var HUES = ['#7B2FFF', '#9B3FFF', '#6615FF', '#4400DD', '#00d4ff', '#00ff88', '#ec4899'];
 var TIMEOUT = 8000;
-var DEV = ['localhost','127.0.0.1','[::1]'].indexOf(location.hostname) > -1 || /[?&]dev=1/.test(location.search);
+var DEV = ['localhost', '127.0.0.1', '[::1]'].indexOf(location.hostname) > -1 || /[?&]dev=1/.test(location.search);
+var FOLDER_RE = /^[a-z0-9][a-z0-9_-]*(\/[a-z0-9][a-z0-9_-]*)*$/i;
 
-var $ = function(id){return document.getElementById(id)};
-var state = {games:[],labels:{},query:''};
+var $ = function(id) { return document.getElementById(id); };
+var state = { games: [], labels: {}, query: '' };
 var warnings = [];
+var cdTimer = null;
+var toastTimer = null;
+var spy = null;
 
-function warn(m){ warnings.push(m); console.warn('[GameyFi] '+m); }
-function el(tag, cls, text){ var e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
+function warn(m) { warnings.push(m); console.warn('[GameyFi] ' + m); }
 
-/* ---------- Fetch helper ---------- */
-async function getJSON(url){
-  var c = new AbortController(), t = setTimeout(function(){c.abort()}, TIMEOUT);
-  try{
-    var r = await fetch(url,{cache:'no-cache',signal:c.signal});
-    if(!r.ok) return {error: r.status===404 ? 'missing' : 'http'};
-    try{ return {data: await r.json()}; }catch(e){ return {error:'invalid'}; }
-  }catch(e){ return {error:'network'}; }
-  finally{ clearTimeout(t); }
+/* ---------- Network Loader Bar & Toast ---------- */
+function setProgress(pct) {
+  var b = $('pb');
+  if (!b) return;
+  b.style.width = pct + '%';
+  if (pct >= 100) setTimeout(function() { b.style.width = '0%'; }, 500);
 }
 
-/* ---------- Validation ---------- */
-var FOLDER_RE = /^[a-z0-9][a-z0-9_-]*(\/[a-z0-9][a-z0-9_-]*)*$/i; // no dots, no "..", no scheme, no leading slash
+function showToast(msg, isErr) {
+  var el = $('toast');
+  var txt = $('toast-txt');
+  if (toastTimer) clearTimeout(toastTimer);
+  el.className = 'show' + (isErr ? ' error' : '');
+  txt.textContent = msg;
+  toastTimer = setTimeout(function() {
+    el.classList.add('hiding');
+    setTimeout(function() { el.className = ''; }, 260);
+  }, 3500);
+}
 
-function validateGames(raw){
+/* ---------- Network Helper ---------- */
+async function getJSON(url) {
+  var c = new AbortController(), t = setTimeout(function() { c.abort(); }, TIMEOUT);
+  try {
+    var r = await fetch(url + '?_t=' + Date.now(), { cache: 'no-cache', signal: c.signal });
+    if (!r.ok) return { error: r.status === 404 ? 'missing' : 'http' };
+    try { return { data: await r.json() }; } catch(e) { return { error: 'invalid' }; }
+  } catch(e) {
+    return { error: 'network' };
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+/* ---------- Universal Games & Category Validation ---------- */
+function validateGames(raw) {
   var out = [];
   var list = raw && Array.isArray(raw.games) ? raw.games : null;
-  if(!list){ warn('games.json must contain a "games" array.'); return {games:[], bad:true}; }
-  list.forEach(function(g,i){
-    var tag = 'games['+i+']'+(g && g.name ? ' ("'+g.name+'")' : '');
-    if(!g || typeof g!=='object'){ warn(tag+': not an object, skipped.'); return; }
-    var vis = typeof g.visibility==='string' ? g.visibility.trim().toLowerCase() : '';
-    if(vis!=='public' && vis!=='private'){ warn(tag+': visibility must be "public" or "private". Hidden by default.'); return; }
-    if(vis==='private') return;
-    var name = typeof g.name==='string' ? g.name.trim() : '';
-    if(!name){ warn(tag+': missing name, skipped.'); return; }
-    var folder = typeof g.folder==='string' ? g.folder.trim().replace(/\/+$/,'') : '';
-    if(!FOLDER_RE.test(folder)){ warn(tag+': invalid folder "'+g.folder+'", skipped.'); return; }
-    var cat = Number(g.category);
-    if(g.category===null||g.category===''||!isFinite(cat)){ warn(tag+': category must be a number. Using 0.'); cat = 0; }
-    var order = Number(g.order);
-    if(g.order===null||g.order===''||!isFinite(order)){ warn(tag+': order must be a number. Placed last.'); order = Infinity; }
-    var image = '';
-    if(typeof g.image==='string' && g.image.trim()){
-      try{ var u = new URL(g.image.trim()); if(u.protocol==='https:') image = u.href; else warn(tag+': image must be https. Using fallback art.'); }
-      catch(e){ warn(tag+': image is not a valid URL. Using fallback art.'); }
+  if (!list) { warn('games.json must contain a "games" array.'); return { games: [], bad: true }; }
+  list.forEach(function(g, i) {
+    var tag = 'games[' + i + ']' + (g && g.name ? ' ("' + g.name + '")' : '');
+    if (!g || typeof g !== 'object') { warn(tag + ': not an object, skipped.'); return; }
+    var vis = typeof g.visibility === 'string' ? g.visibility.trim().toLowerCase() : '';
+    if (vis !== 'public' && vis !== 'private') { warn(tag + ': visibility must be "public" or "private". Hidden by default.'); return; }
+    if (vis === 'private') return;
+    var name = typeof g.name === 'string' ? g.name.trim() : '';
+    if (!name) { warn(tag + ': missing name, skipped.'); return; }
+    var folder = typeof g.folder === 'string' ? g.folder.trim().replace(/\/+$/, '') : '';
+    if (!FOLDER_RE.test(folder)) { warn(tag + ': invalid folder "' + g.folder + '", skipped.'); return; }
+    
+    // Support all category formats (numeric IDs or raw category strings)
+    var cat = g.category;
+    if (cat === null || cat === undefined || cat === '') {
+      cat = 0;
+    } else if (!isNaN(Number(cat))) {
+      cat = Number(cat);
+    } else {
+      cat = String(cat).trim();
     }
-    out.push({name:name, description: typeof g.description==='string' ? g.description.trim() : '', category:cat, order:order, folder:folder, image:image});
+
+    var order = Number(g.order);
+    if (g.order === null || g.order === '' || !isFinite(order)) { order = Infinity; }
+    
+    var image = '';
+    if (typeof g.image === 'string' && g.image.trim()) {
+      var imgTrimmed = g.image.trim();
+      try {
+        var u = new URL(imgTrimmed, location.href);
+        image = u.href;
+      } catch(e) {
+        image = imgTrimmed;
+      }
+    }
+    out.push({
+      name: name,
+      description: typeof g.description === 'string' ? g.description.trim() : '',
+      category: cat,
+      order: order,
+      folder: folder,
+      image: image
+    });
   });
-  return {games:out, total:list.length};
+  return { games: out, total: list.length };
 }
 
-/* ---------- Helpers ---------- */
-function labelFor(cat){ return state.labels[cat] || FALLBACK_LABEL; }
-function hueFor(cat){ return HUES[Math.abs(cat) % HUES.length]; }
-function sortGames(a,b){
-  return (a.order===b.order ? 0 : a.order<b.order ? -1 : 1) ||
-    a.name.localeCompare(b.name,undefined,{sensitivity:'base'}) || a.folder.localeCompare(b.folder);
-}
-
-// Neutral fallback art: faint board grid with the game's initials.
-function art(g){
-  var ns='http://www.w3.org/2000/svg', s=document.createElementNS(ns,'svg');
-  s.setAttribute('viewBox','0 0 100 100'); s.setAttribute('preserveAspectRatio','xMidYMid slice'); s.setAttribute('aria-hidden','true');
-  var hue = hueFor(g.category);
-  var bg = document.createElementNS(ns,'rect'); bg.setAttribute('width','100'); bg.setAttribute('height','100'); bg.setAttribute('fill','#101214'); s.appendChild(bg);
-  for(var i=1;i<5;i++){
-    var v=document.createElementNS(ns,'path'); v.setAttribute('d','M'+i*20+' 0V100'); v.setAttribute('stroke',hue); v.setAttribute('stroke-opacity','.12'); s.appendChild(v);
-    { var h=document.createElementNS(ns,'path'); h.setAttribute('d','M0 '+i*20+'H100'); h.setAttribute('stroke',hue); h.setAttribute('stroke-opacity','.12'); s.appendChild(h); }
+/* All-category label, hue & icon mapper */
+function labelFor(cat) { 
+  if (state.labels[cat]) return state.labels[cat];
+  if (typeof cat === 'string' && cat.length > 0) {
+    return cat.charAt(0).toUpperCase() + cat.slice(1);
   }
-  var t=document.createElementNS(ns,'text'); t.setAttribute('x','50'); t.setAttribute('y','62'); t.setAttribute('text-anchor','middle');
-  t.setAttribute('font-size','30'); t.setAttribute('font-weight','800'); t.setAttribute('fill',hue); t.setAttribute('font-family','Inter,system-ui,sans-serif');
-  t.textContent = g.name.split(/\s+/).filter(function(w){return /[a-z0-9]/i.test(w)}).slice(0,2).map(function(w){return /^\d+$/.test(w)?w:w[0].toUpperCase()}).join('') || '?';
+  return 'Games'; 
+}
+
+function catIcon(cat) { 
+  if (CAT_ICONS[cat]) return CAT_ICONS[cat];
+  var label = String(labelFor(cat)).toLowerCase();
+  for (var key in CAT_ICONS) {
+    if (label.indexOf(key) !== -1) return CAT_ICONS[key];
+  }
+  return 'i-gamepad'; 
+}
+
+function hueFor(cat) {
+  var hash = 0;
+  var str = String(cat);
+  for (var i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return HUES[Math.abs(hash) % HUES.length];
+}
+
+function sortGames(a, b) {
+  return (a.order === b.order ? 0 : a.order < b.order ? -1 : 1) ||
+    a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) ||
+    a.folder.localeCompare(b.folder);
+}
+
+/* Neutral Fallback Art */
+function makeArt(g) {
+  var ns = 'http://www.w3.org/2000/svg', s = document.createElementNS(ns, 'svg');
+  s.setAttribute('viewBox', '0 0 100 100'); s.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+  var hue = hueFor(g.category);
+  var bg = document.createElementNS(ns, 'rect');
+  bg.setAttribute('width', '100'); bg.setAttribute('height', '100'); bg.setAttribute('fill', '#101214');
+  s.appendChild(bg);
+  for (var i = 1; i < 5; i++) {
+    var v = document.createElementNS(ns, 'path');
+    v.setAttribute('d', 'M' + (i * 20) + ' 0V100'); v.setAttribute('stroke', hue); v.setAttribute('stroke-opacity', '.14');
+    s.appendChild(v);
+    var h = document.createElementNS(ns, 'path');
+    h.setAttribute('d', 'M0 ' + (i * 20) + 'H100'); h.setAttribute('stroke', hue); h.setAttribute('stroke-opacity', '.14');
+    s.appendChild(h);
+  }
+  var t = document.createElementNS(ns, 'text');
+  t.setAttribute('x', '50'); t.setAttribute('y', '62'); t.setAttribute('text-anchor', 'middle');
+  t.setAttribute('font-size', '28'); t.setAttribute('font-weight', '900'); t.setAttribute('fill', hue);
+  t.setAttribute('font-family', 'Satoshi, sans-serif');
+  t.textContent = g.name.split(/\s+/).filter(function(w){ return /[a-z0-9]/i.test(w); }).slice(0, 2).map(function(w){ return /^\d+$/.test(w) ? w : w[0].toUpperCase(); }).join('') || '?';
   s.appendChild(t);
   return s;
 }
 
-/* ---------- Cards ---------- */
-function icon(g){
-  var d = el('div','icon'); d.appendChild(art(g));
-  if(g.image){
-    var img = new Image(); img.alt=''; img.loading='lazy'; img.decoding='async'; img.referrerPolicy='no-referrer';
-    img.onload = function(){ img.classList.add('ok'); };
-    img.onerror = function(){ img.remove(); warn('Thumbnail failed to load for "'+g.name+'".'); };
-    img.src = g.image; d.appendChild(img);
-  }
-  return d;
-}
-function card(g){
-  var li = el('li');
-  var a = el('a','card'); a.href = g.folder + '/'; a.style.setProperty('--hue',hueFor(g.category));
-  a.appendChild(icon(g)); a.appendChild(el('h3',null,g.name)); a.appendChild(el('span','pub',labelFor(g.category)));
-  if(g.description) a.appendChild(el('p','desc',g.description));
-  a.appendChild(pill());
-  a.addEventListener('click', function(ev){ open(ev,a,g); });
-  li.appendChild(a); return li;
-}
-function slide(g){
-  var li = el('li');
-  var a = el('a','slide'); a.href = g.folder + '/'; a.style.setProperty('--hue',hueFor(g.category)); 
-  var info = el('div','info');
-  info.appendChild(el('h3',null,g.name)); info.appendChild(el('span','pub',labelFor(g.category)));
-  if(g.description) info.appendChild(el('p',null,g.description));
-  info.appendChild(pill());
-  a.appendChild(icon(g)); a.appendChild(info);
-  a.addEventListener('click', function(ev){ open(ev,a,g); });
-  li.appendChild(a); return li;
-}
-
-// Checks the game page exists before leaving. Offline or odd responses navigate anyway.
-async function open(ev,a,g){
-  if(ev.defaultPrevented || ev.button!==0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
-  ev.preventDefault();
-  if(a.getAttribute('aria-busy')==='true') return;
-  a.setAttribute('aria-busy','true');
+/* ---------- Navigation with Pre-Check & Progress ---------- */
+async function launchGame(e, g) {
+  if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  e.preventDefault();
+  var href = g.folder + '/';
+  setProgress(60);
+  showToast('Launching ' + g.name + '…');
   var ok = true;
-  try{
-    var c = new AbortController(), t = setTimeout(function(){c.abort()},4000);
-    var r = await fetch(a.href,{method:'HEAD',signal:c.signal}); clearTimeout(t);
-    if(r.status===404 || r.status===410) ok = false;
-  }catch(e){}
-  if(ok){ location.assign(a.href); setTimeout(function(){a.removeAttribute('aria-busy')},3000); }
-  else{ a.removeAttribute('aria-busy'); warn('Game folder not found: '+g.folder+'/'); toast('"'+g.name+'" isn\'t available right now. It may not be deployed yet.'); }
+  try {
+    var c = new AbortController(), t = setTimeout(function() { c.abort(); }, 3500);
+    var r = await fetch(href, { method: 'HEAD', signal: c.signal });
+    clearTimeout(t);
+    if (r.status === 404 || r.status === 410) ok = false;
+  } catch(err) {}
+
+  if (ok) {
+    setProgress(100);
+    setTimeout(function() { location.assign(href); }, 200);
+  } else {
+    setProgress(0);
+    showToast('"' + g.name + '" is not available right now.', true);
+  }
 }
 
-var toastT;
-function toast(m){ var t=$('toast'); t.textContent=m; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(function(){t.hidden=true},5000); }
+/* ---------- Card & Slide Builders ---------- */
+function createCard(g) {
+  var div = document.createElement('div');
+  div.className = 'game-card';
+  div.onclick = function(e) { launchGame(e, g); };
 
-/* ---------- Rendering ---------- */
-function grid(games){ var ul=el('ul','grid'); games.forEach(function(g,i){ var li=card(g); li.style.setProperty('--i',Math.min(i,14)); ul.appendChild(li); }); return ul; }
+  var box = document.createElement('div');
+  box.className = 'game-icon-box';
+  box.appendChild(makeArt(g));
+  if (g.image) {
+    var img = new Image();
+    img.alt = g.name; img.loading = 'lazy'; img.decoding = 'async';
+    img.onload = function() { img.classList.add('ok'); };
+    img.onerror = function() { img.remove(); };
+    img.src = g.image;
+    box.appendChild(img);
+  }
+  div.appendChild(box);
 
-function message(title, text, retry){
-  var d=el('div','state'); d.appendChild(el('h2',null,title)); d.appendChild(el('p',null,text));
-  if(retry){ var b=el('button','btn',retry.label); b.type='button'; b.addEventListener('click',retry.fn); d.appendChild(b); }
-  return d;
+  var h4 = document.createElement('h4');
+  h4.textContent = g.name;
+  div.appendChild(h4);
+
+  var tag = document.createElement('span');
+  tag.className = 'game-tag';
+  tag.textContent = labelFor(g.category);
+  div.appendChild(tag);
+
+  var p = document.createElement('p');
+  p.textContent = g.description || 'Browser game.';
+  div.appendChild(p);
+
+  var btn = document.createElement('div');
+  btn.className = 'game-btn';
+  btn.innerHTML = '<svg class="i" style="width:13px;height:13px;" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3" fill="currentColor"/></svg>Play Now';
+  div.appendChild(btn);
+
+  return div;
 }
 
-function render(){
-  var box=$('content'); box.textContent=''; box.setAttribute('aria-busy','false');
+function createSlide(g) {
+  var li = document.createElement('li');
+  var card = document.createElement('div');
+  card.className = 'slide-card';
+  card.onclick = function(e) { launchGame(e, g); };
+
+  var thumb = document.createElement('div');
+  thumb.className = 'slide-thumb';
+  thumb.appendChild(makeArt(g));
+  if (g.image) {
+    var img = new Image();
+    img.alt = g.name;
+    img.loading = 'eager';
+    img.decoding = 'async';
+    img.onload = function() { img.classList.add('ok'); };
+    img.onerror = function() { img.remove(); };
+    img.src = g.image;
+    thumb.appendChild(img);
+  }
+  card.appendChild(thumb);
+
+  var info = document.createElement('div');
+  info.className = 'slide-info';
+  var tag = document.createElement('span');
+  tag.className = 'game-tag';
+  tag.style.alignSelf = 'flex-start';
+  tag.textContent = labelFor(g.category);
+  info.appendChild(tag);
+
+  var h3 = document.createElement('h3');
+  h3.textContent = g.name;
+  info.appendChild(h3);
+
+  if (g.description) {
+    var p = document.createElement('p');
+    p.textContent = g.description;
+    info.appendChild(p);
+  }
+  card.appendChild(info);
+
+  li.appendChild(card);
+  return li;
+}
+
+/* ---------- Dots Carousel Sync ---------- */
+function syncDots() {
+  var r = $('rail'), d = $('dots');
+  d.textContent = '';
+  var n = r.children.length;
+  if (n < 2) return;
+  for (var i = 0; i < n; i++) d.appendChild(document.createElement('span'));
+  var sync = function() {
+    if (!r.children[0]) return;
+    var k = Math.round(r.scrollLeft / (r.children[0].offsetWidth + 14));
+    [].forEach.call(d.children, function(x, idx) { x.classList.toggle('on', idx === k); });
+  };
+  r.onscroll = sync;
+  sync();
+}
+
+/* ---------- Rendering Engine ---------- */
+function render() {
+  var box = $('content');
+  box.innerHTML = '';
   var q = state.query.trim().toLowerCase();
-  $('hero').hidden = !!q; $('main').classList.toggle('reveal', firstRender && !q);
-  if(q){
-    var tokens=q.split(/\s+/);
-    var hits = state.games.filter(function(g){
-      var hay=(g.name+' '+g.description+' '+labelFor(g.category)).toLowerCase();
-      return tokens.every(function(t){return hay.indexOf(t)>-1});
+
+  $('heroSection').hidden = !!q;
+
+  if (q) {
+    var tokens = q.split(/\s+/);
+    var hits = state.games.filter(function(g) {
+      var hay = (g.name + ' ' + g.description + ' ' + labelFor(g.category)).toLowerCase();
+      return tokens.every(function(t) { return hay.indexOf(t) > -1; });
     }).sort(sortGames);
-    $('live').textContent = hits.length ? hits.length+' game'+(hits.length===1?'':'s')+' found' : 'No games found';
-    if(!hits.length){ box.appendChild(message('No games found. Try another search.','Check the spelling, or search for a category such as strategy.')); return; }
-    var s=el('section','cat'); var h=el('h2',null,'Search results'); s.appendChild(h); s.appendChild(grid(hits)); box.appendChild(s); return;
+
+    $('live').textContent = hits.length ? hits.length + ' games found' : 'No games found';
+
+    if (!hits.length) {
+      box.innerHTML = '<div style="text-align:center; padding:60px 0; color:var(--text-dim); font-weight:700;">No games match your query.</div>';
+      return;
+    }
+    var grid = document.createElement('div');
+    grid.className = 'games-grid';
+    hits.forEach(function(g) { grid.appendChild(createCard(g)); });
+    box.appendChild(grid);
+    return;
   }
-  $('live').textContent='';
-  var rail=$('rail'); rail.textContent=''; $('heroSub').textContent=state.games.length+' games for phone, tablet and desktop.';
-  state.games.slice().sort(function(a,b){return a.category-b.category||sortGames(a,b)}).forEach(function(g){ rail.appendChild(slide(g)); });
-  if(!state.games.length) return;
-  var groups={};
-  state.games.forEach(function(g){ (groups[g.category]=groups[g.category]||[]).push(g); });
-  var cats=Object.keys(groups).map(Number).sort(function(a,b){return a-b});
-  cats.forEach(function(cat){
-    var list=groups[cat].sort(sortGames);
-    var s=el('section','cat'); s.id='cat-'+cat; s.style.setProperty('--hue',hueFor(cat));
-    var h=el('h2',null,labelFor(cat)+' '); h.appendChild(el('small',null,'('+list.length+')')); h.insertBefore(ico(cat),h.firstChild);
-    s.appendChild(h); s.appendChild(grid(list)); box.appendChild(s);
+
+  $('live').textContent = '';
+
+  // Rail
+  var rail = $('rail');
+  rail.innerHTML = '';
+  state.games.slice().sort(function(a, b) { 
+    return (String(a.category)).localeCompare(String(b.category)) || sortGames(a, b); 
+  }).forEach(function(g) {
+    rail.appendChild(createSlide(g));
   });
-  buildNav(cats);
+  syncDots();
+
+  // Multi-Category Grouping
+  var groups = {};
+  state.games.forEach(function(g) { 
+    (groups[g.category] = groups[g.category] || []).push(g); 
+  });
+  
+  var cats = Object.keys(groups).sort(function(a, b) {
+    if (!isNaN(a) && !isNaN(b)) return Number(a) - Number(b);
+    return String(a).localeCompare(String(b));
+  });
+
+  cats.forEach(function(cat) {
+    var list = groups[cat].sort(sortGames);
+    var sec = document.createElement('section');
+    sec.id = 'cat-' + String(cat).replace(/[^a-z0-9_-]/gi, '_');
+
+    var head = document.createElement('div');
+    head.className = 'sec-head';
+    head.innerHTML = `
+      <span class="sec-title">
+        <svg class="i" style="width:14px;height:14px;"><use href="#${catIcon(cat)}"/></svg>
+        ${labelFor(cat)}
+      </span>
+      <div class="sec-rule"></div>
+      <span class="count-pill">${list.length}</span>
+    `;
+    sec.appendChild(head);
+
+    var grid = document.createElement('div');
+    grid.className = 'games-grid';
+    list.forEach(function(g) { grid.appendChild(createCard(g)); });
+    sec.appendChild(grid);
+
+    box.appendChild(sec);
+  });
+
+  buildSidebarNav(cats);
 }
 
-function showSkeleton(){
-  var box=$('content'); box.textContent=''; box.setAttribute('aria-busy','true');
-  var rl=$('rail'); rl.textContent=''; var sl=el('li'); sl.appendChild(el('div','skel skel-hero')); rl.appendChild(sl);
-  var ul=el('ul','grid'); for(var i=0;i<6;i++){ var li=el('li'); li.appendChild(el('div','skel')); ul.appendChild(li); } box.appendChild(ul);
+function buildSidebarNav(cats) {
+  var container = $('navCats');
+  container.innerHTML = '';
+  cats.forEach(function(c) {
+    var safeId = 'cat-' + String(c).replace(/[^a-z0-9_-]/gi, '_');
+    var a = document.createElement('a');
+    a.className = 'side-link';
+    a.href = '#' + safeId;
+    a.dataset.cat = c;
+    a.innerHTML = `<svg class="i" style="width:14px;height:14px;"><use href="#${catIcon(c)}"/></svg>${labelFor(c)}`;
+    a.onclick = function(e) {
+      e.preventDefault();
+      closeSidebar();
+      if (state.query) {
+        $('q').value = '';
+        state.query = '';
+        render();
+      }
+      var el = $(safeId);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    };
+    container.appendChild(a);
+  });
+
+  if (spy) spy.disconnect();
+  spy = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+      if (e.isIntersecting) {
+        var elId = e.target.id;
+        [].forEach.call($('navCats').children, function(x) {
+          x.classList.toggle('active', x.getAttribute('href') === '#' + elId);
+        });
+        $('navAll').classList.remove('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  cats.forEach(function(c) {
+    var safeId = 'cat-' + String(c).replace(/[^a-z0-9_-]/gi, '_');
+    var s = $(safeId);
+    if (s) spy.observe(s);
+  });
 }
 
-function showWarnings(){
-  var w=$('devwarn'); if(!DEV || !warnings.length){ w.hidden=true; return; }
-  w.textContent=''; w.appendChild(el('strong',null,'Development warnings ('+warnings.length+')'));
-  var ul=el('ul'); warnings.forEach(function(m){ ul.appendChild(el('li',null,m)); }); w.appendChild(ul); w.hidden=false;
+function renderSkeletons() {
+  $('content').innerHTML = `
+    <div class="games-grid">
+      ${'<div class="skel-card"></div>'.repeat(6)}
+    </div>
+  `;
 }
 
-/* ---------- Load catalogue ---------- */
-async function loadGames(){
-  showSkeleton(); warnings=[];
+function showWarnings() {
+  var w = $('devwarn');
+  if (!DEV || !warnings.length) { w.hidden = true; return; }
+  w.innerHTML = '<strong>Development Warnings (' + warnings.length + '):</strong><ul>' +
+    warnings.map(function(m) { return '<li>' + m + '</li>'; }).join('') + '</ul>';
+  w.hidden = false;
+}
+
+/* ---------- Load Catalogue ---------- */
+async function loadGames() {
+  renderSkeletons();
+  warnings = [];
   var r = await getJSON('games.json');
-  var box=$('content');
-  if(r.error){
-    var offline = !navigator.onLine || r.error==='network';
-    var msgs = {
-      missing:['Game list not found','The catalogue file (games.json) is missing from the site.'],
-      invalid:['Game list is unreadable','games.json contains a syntax error. Check it with a JSON validator.'],
-      http:['Game list unavailable','The server returned an error. Try again in a moment.'],
-      network: ['Can\'t load games', offline ? 'You appear to be offline. Reconnect and try again.' : 'The request timed out. Try again.']
-    }[r.error];
-    console.warn('[GameyFi] games.json failed: '+r.error);
-    box.textContent=''; box.setAttribute('aria-busy','false');
-    box.appendChild(message(msgs[0],msgs[1],{label:'Try again',fn:loadGames}));
-    $('hero').hidden=true; return;
+  var box = $('content');
+
+  if (r.error) {
+    var offline = !navigator.onLine || r.error === 'network';
+    box.innerHTML = '<div style="text-align:center; padding:50px 0;"><h3 style="margin-bottom:8px;">Game List Unavailable</h3><p style="color:var(--text-sub); margin-bottom:16px;">' +
+      (offline ? 'You appear to be offline.' : 'Could not retrieve games.json.') +
+      '</p><button class="btn" id="retryLoadBtn"><span class="shim"></span>Try Again</button></div>';
+    $('retryLoadBtn').onclick = loadGames;
+    $('heroSection').hidden = true;
+    return;
   }
+
   var v = validateGames(r.data);
-  state.labels = Object.assign({}, CATEGORY_LABELS);
+  state.labels = Object.assign({}, DEFAULT_CATEGORY_LABELS);
   var custom = r.data && r.data.categories;
-  if(custom && typeof custom==='object') Object.keys(custom).forEach(function(k){ if(typeof custom[k]==='string' && custom[k].trim()) state.labels[Number(k)] = custom[k].trim(); });
+  if (custom && typeof custom === 'object') {
+    Object.keys(custom).forEach(function(k) {
+      if (typeof custom[k] === 'string' && custom[k].trim()) {
+        state.labels[k] = custom[k].trim();
+      }
+    });
+  }
+
   state.games = v.games;
-  var n=v.games.length;
-  if(!n) $('hero').hidden=true;
   showWarnings();
-  if(v.bad){ box.textContent=''; box.setAttribute('aria-busy','false'); box.appendChild(message('Game list is unreadable','games.json is missing a "games" list.',{label:'Try again',fn:loadGames})); return; }
-  if(!v.total){ box.textContent=''; box.setAttribute('aria-busy','false'); box.appendChild(message('No games yet','The catalogue is empty. Add games to games.json.')); return; }
-  if(!n){ box.textContent=''; box.setAttribute('aria-busy','false'); box.appendChild(message('No games available','Nothing is public right now. Check back soon.')); return; }
+
+  if (!state.games.length) {
+    box.innerHTML = '<div style="text-align:center; padding:60px 0; color:var(--text-dim); font-weight:700;">No games are public right now.</div>';
+    $('heroSection').hidden = true;
+    return;
+  }
+
+  $('heroSub').textContent = state.games.length + ' games for phone, tablet and desktop.';
   render();
 }
 
-/* ---------- Maintenance ---------- */
-var cdTimer;
-function parseMaintenance(d){
-  var cfg={on:false,message:'GameyFi is currently undergoing maintenance. Please come back soon.',end:null};
-  if(!d || typeof d!=='object'){ warn('maintenance.json is not an object. Treating maintenance as off.'); return cfg; }
-  var m = typeof d.maintenance==='string' ? d.maintenance.trim().toLowerCase() : '';
-  if(m==='on') cfg.on=true; else if(m!=='off') warn('maintenance must be "on" or "off". Treating as off.');
-  if(typeof d.message==='string' && d.message.trim()) cfg.message=d.message.trim();
-  if(d.countdownEnabled===true){
-    var s = typeof d.countdownEnd==='string' ? d.countdownEnd.trim() : '';
-    var t = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s) ? Date.parse(s) : NaN;
-    if(isFinite(t)){ cfg.end=t; if(!/(Z|[+-]\d{2}:?\d{2})$/i.test(s)) warn('countdownEnd has no timezone; the visitor\'s local time is used.'); }
-    else warn('countdownEnd is not a valid ISO 8601 date-time. Countdown hidden.');
+/* ---------- Maintenance Controller ---------- */
+function parseMaintenance(d) {
+  var cfg = { on: false, message: 'GameyFi is undergoing maintenance. Please come back soon.', end: null };
+  if (!d || typeof d !== 'object') { return cfg; }
+  var m = typeof d.maintenance === 'string' ? d.maintenance.trim().toLowerCase() : '';
+  if (m === 'on') cfg.on = true;
+  if (typeof d.message === 'string' && d.message.trim()) cfg.message = d.message.trim();
+  if (d.countdownEnabled === true) {
+    var s = typeof d.countdownEnd === 'string' ? d.countdownEnd.trim() : '';
+    var t = Date.parse(s);
+    if (isFinite(t) && t > Date.now()) cfg.end = t;
   }
   return cfg;
 }
 
-function pad(n){ return n<10 ? '0'+n : ''+n; }
-function tick(end){
-  var ms=Math.max(0,end-Date.now()), s=Math.floor(ms/1000);
-  $('cdD').textContent=Math.floor(s/86400); $('cdH').textContent=pad(Math.floor(s%86400/3600));
-  $('cdM').textContent=pad(Math.floor(s%3600/60)); $('cdS').textContent=pad(s%60);
-  if(ms===0){ clearInterval(cdTimer); $('maintMsg').textContent='The scheduled time has passed. Select "Check again" to see if GameyFi is back.'; }
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function tick(end) {
+  var ms = Math.max(0, end - Date.now()), s = Math.floor(ms / 1000);
+  $('cdD').textContent = Math.floor(s / 86400);
+  $('cdH').textContent = pad(Math.floor((s % 86400) / 3600));
+  $('cdM').textContent = pad(Math.floor((s % 3600) / 60));
+  $('cdS').textContent = pad(s % 60);
+  if (ms === 0) {
+    clearInterval(cdTimer);
+    $('maintMsg').textContent = 'Scheduled time reached. Click "Check Again" below.';
+  }
 }
 
-function showMaintenance(cfg){
-  $('app').hidden=true; $('maint').hidden=false; $('maintMsg').textContent=cfg.message;
-  clearInterval(cdTimer); $('cd').hidden=!cfg.end;
-  if(cfg.end){ tick(cfg.end); cdTimer=setInterval(function(){tick(cfg.end)},1000); }
+function showMaintenance(cfg) {
+  $('app').hidden = true;
+  $('maint').hidden = false;
+  $('maintMsg').textContent = cfg.message;
+  clearInterval(cdTimer);
+  $('cd').hidden = !cfg.end;
+  if (cfg.end) {
+    tick(cfg.end);
+    cdTimer = setInterval(function() { tick(cfg.end); }, 1000);
+  }
 }
 
-async function start(){
-  var mr = await getJSON('maintenance.json');
-  var cfg;
-  if(mr.error){ console.warn('[GameyFi] maintenance.json unavailable ('+mr.error+'). Showing the normal site.'); cfg={on:false}; }
-  else cfg=parseMaintenance(mr.data);
-  bootOut();
-  if(cfg.on){ showMaintenance(cfg); return; }
-  $('maint').hidden=true; $('app').hidden=false;
-  await loadGames();
-}
+/* ---------- UI Sidebar & Search Handlers ---------- */
+function openSidebar() { document.body.classList.add('left-sidebar-open'); }
+function closeSidebar() { document.body.classList.remove('left-sidebar-open'); }
 
-$('recheck').addEventListener('click', function(){ $('boot').classList.remove('out'); $('boot').hidden=false; start(); });
+$('menuBtn').onclick = openSidebar;
+$('overlay').onclick = closeSidebar;
+$('bnMenu').onclick = openSidebar;
+$('bnHome').onclick = function() {
+  closeSidebar();
+  if (state.query) { $('q').value = ''; state.query = ''; render(); }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+$('bnSearch').onclick = function() {
+  closeSidebar();
+  $('q').focus();
+};
+$('navAll').onclick = function(e) {
+  e.preventDefault();
+  closeSidebar();
+  if (state.query) { $('q').value = ''; state.query = ''; render(); }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
 
-/* ---------- Search ---------- */
-var sform=$('sform'), q=$('q');
-function openSearch(){ sform.hidden=false; sform.classList.add('open'); $('searchBtn').setAttribute('aria-expanded','true'); q.focus(); }
-function closeSearch(){ sform.hidden=true; $('searchBtn').setAttribute('aria-expanded','false'); q.value=''; setQuery(''); $('searchBtn').focus(); }
-function setQuery(v){ state.query=v; $('clearBtn').hidden=!v; if(state.games.length) render(); }
-$('searchBtn').addEventListener('click', function(){ sform.hidden ? openSearch() : closeSearch(); });
-$('closeBtn').addEventListener('click', closeSearch);
-$('clearBtn').addEventListener('click', function(){ q.value=''; setQuery(''); q.focus(); });
-q.addEventListener('input', function(){ setQuery(q.value); });
-sform.addEventListener('submit', function(e){ e.preventDefault(); });
-sform.addEventListener('keydown', function(e){ if(e.key==='Escape') closeSearch(); });
-document.addEventListener('keydown', function(e){
-  if(e.key==='/' && sform.hidden && !/INPUT|TEXTAREA/.test(document.activeElement.tagName) && !$('app').hidden){ e.preventDefault(); openSearch(); }
+$('q').oninput = function(e) {
+  state.query = e.target.value;
+  $('clearBtn').classList.toggle('vis', state.query.length > 0);
+  render();
+};
+$('clearBtn').onclick = function() {
+  $('q').value = '';
+  state.query = '';
+  $('clearBtn').classList.remove('vis');
+  render();
+  $('q').focus();
+};
+
+/* Keyboard Shortcut: Cmd/Ctrl + K or / */
+document.addEventListener('keydown', function(e) {
+  if ((e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key === 'k')) && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) {
+    e.preventDefault();
+    $('q').focus();
+  }
+  if (e.key === 'Escape') {
+    closeSidebar();
+    $('q').blur();
+  }
 });
 
-/* ---------- Sidebar, nav, spotlight ---------- */
-var RM = matchMedia('(prefers-reduced-motion: reduce)').matches, firstRender = true, spy = null;
-var CAT_ICONS={1:'i-dice',2:'i-crown',3:'i-target'};
-function catIcon(c){ return CAT_ICONS[c]||'i-gamepad'; }
-function ico(c){ var d=el('span','ci'); d.style.color=hueFor(c); d.innerHTML='<svg class="i" aria-hidden="true"><use href="#'+catIcon(c)+'"/></svg>'; return d; }
-function buildDots(){
-  var r=$('rail'), d=$('dots'); d.textContent=''; var n=r.children.length; if(n<2) return;
-  for(var i=0;i<n;i++) d.appendChild(el('span'));
-  var sync=function(){ var k=Math.round(r.scrollLeft/(r.children[0].offsetWidth+14)); [].forEach.call(d.children,function(x,j){ x.classList.toggle('on',j===k); }); };
-  r.onscroll=sync; sync();
-}
-function bootOut(){ var b=$('boot'); b.classList.add('out'); setTimeout(function(){ b.hidden=true; },RM?0:350); }
-function pill(){ var p=el('span','pill'); p.innerHTML='<svg class="pi" aria-hidden="true"><use href="#i-play"/></svg>Play'; return p; }
-function setMenu(o){ document.body.classList.toggle('left-sidebar-open',o); $('menuBtn').setAttribute('aria-expanded',o?'true':'false'); }
-function closeMenu(){ setMenu(false); }
-function setActive(c){ [].forEach.call($('navCats').children,function(x){ x.classList.toggle('active', c!=null && x.dataset.cat===String(c)); }); $('navAll').classList.toggle('active', c==null); }
-function buildNav(cats){
-  var n=$('navCats'); n.textContent='';
-  cats.forEach(function(c){
-    var a=el('a',null,labelFor(c)); a.href='#cat-'+c; a.dataset.cat=c;
-    a.insertBefore(ico(c),a.firstChild);
-    a.addEventListener('click',function(e){
-      e.preventDefault(); closeMenu(); if(state.query) closeSearch();
-      var t=$('cat-'+c); if(t) t.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'});
+/* ---------- Install Flow (PWA) ---------- */
+var deferred = null;
+var standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferred = e;
+  $('installBtn').hidden = false;
+});
+window.addEventListener('appinstalled', function() {
+  deferred = null;
+  $('installBtn').hidden = true;
+  showToast('GameyFi installed successfully.');
+});
+if (isIOS && !standalone) $('installBtn').hidden = false;
+
+$('installBtn').addEventListener('click', async function() {
+  if (deferred) {
+    deferred.prompt();
+    try { await deferred.userChoice; } catch(err) {}
+    deferred = null;
+    $('installBtn').hidden = true;
+  } else if (isIOS) {
+    $('iosDlg').showModal ? $('iosDlg').showModal() : showToast('Tap Share, then Add to Home Screen.');
+  }
+});
+$('iosOk').addEventListener('click', function() { $('iosDlg').close(); });
+
+/* ---------- Offline Check & Service Worker ---------- */
+function syncNetStatus() { $('net').hidden = navigator.onLine; }
+window.addEventListener('online', syncNetStatus);
+window.addEventListener('offline', syncNetStatus);
+syncNetStatus();
+
+if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('service-worker.js').catch(function(err) {
+      console.warn('[GameyFi] SW failed:', err);
     });
-    n.appendChild(a);
   });
-  if(spy) spy.disconnect();
-  spy=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting) setActive(e.target.id.slice(4)); }); },{rootMargin:'-20% 0px -70% 0px'});
-  cats.forEach(function(c){ var s=$('cat-'+c); if(s) spy.observe(s); });
-  buildDots(); firstRender=false;
 }
-$('menuBtn').addEventListener('click',function(){ setMenu(!document.body.classList.contains('left-sidebar-open')); });
-$('overlay').addEventListener('click',closeMenu);
-document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeMenu(); });
-$('navAll').addEventListener('click',function(e){ e.preventDefault(); closeMenu(); if(state.query) closeSearch(); window.scrollTo({top:0,behavior:RM?'auto':'smooth'}); });
-$('bnHome').addEventListener('click',function(){ $('navAll').click(); });
-$('bnSearch').addEventListener('click',function(){ sform.hidden ? openSearch() : q.focus(); window.scrollTo({top:0,behavior:RM?'auto':'smooth'}); });
-$('bnMenu').addEventListener('click',function(){ setMenu(true); });
-$('navSearch').addEventListener('click',function(){ closeMenu(); openSearch(); });
-addEventListener('scroll',function(){ document.querySelector('.main-header').classList.toggle('scrolled',scrollY>8); if(scrollY<120) setActive(null); },{passive:true});
-// Cursor spotlight on cards and featured slides
-document.addEventListener('pointermove',function(e){
-  var c=e.target.closest && e.target.closest('.card,.slide'); if(!c) return;
-  var r=c.getBoundingClientRect(); c.style.setProperty('--mx',(e.clientX-r.left)+'px'); c.style.setProperty('--my',(e.clientY-r.top)+'px');
-});
 
-/* ---------- Install (PWA) ---------- */
-var deferred=null, standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
-window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferred=e; $('installBtn').hidden=false; });
-window.addEventListener('appinstalled', function(){ deferred=null; $('installBtn').hidden=true; toast('GameyFi installed.'); });
-if(isIOS && !standalone) $('installBtn').hidden=false;
-$('installBtn').addEventListener('click', async function(){
-  if(deferred){ deferred.prompt(); try{ await deferred.userChoice; }catch(e){} deferred=null; $('installBtn').hidden=true; }
-  else if(isIOS){ $('iosDlg').showModal ? $('iosDlg').showModal() : toast('Tap Share, then Add to Home Screen.'); }
-});
-$('iosOk').addEventListener('click', function(){ $('iosDlg').close(); });
+/* ---------- Boot Flow ---------- */
+async function start() {
+  setProgress(25);
+  var mr = await getJSON('maintenance.json');
+  var cfg = mr.error ? { on: false } : parseMaintenance(mr.data);
 
-/* ---------- Offline indicator + service worker ---------- */
-function net(){ $('net').hidden = navigator.onLine; }
-window.addEventListener('online', net); window.addEventListener('offline', net); net();
-if('serviceWorker' in navigator && (location.protocol==='https:' || location.hostname==='localhost')){
-  window.addEventListener('load', function(){ navigator.serviceWorker.register('service-worker.js').catch(function(e){ console.warn('[GameyFi] Service worker registration failed:', e); }); });
+  setProgress(60);
+  $('boot').classList.add('out');
+  setTimeout(function() { $('boot').hidden = true; }, 400);
+
+  if (cfg.on) {
+    showMaintenance(cfg);
+    setProgress(100);
+    return;
+  }
+
+  $('maint').hidden = true;
+  $('app').hidden = false;
+  await loadGames();
+  setProgress(100);
 }
+
+$('recheck').onclick = function() {
+  $('boot').classList.remove('out');
+  $('boot').hidden = false;
+  start();
+};
 
 start();
 })();
