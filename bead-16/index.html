@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Bead 16 (Sholo Guti) — Minimal 2D Offline Board Game</title>
+  <meta name="description" content="Play Bead 16 (Sholo Guti) offline! A clean, modern 2D strategy board game with multi-jump chain captures, smart offline AI, and 2-player local pass-and-play." />
+  <meta name="keywords" content="Bead 16, Sholo Guti, 16 Guti, Sixteen Soldiers, offline 2D board game, HTML5 strategy game" />
+  <meta property="og:title" content="Bead 16 (Sholo Guti) — Minimal 2D Offline Board Game" />
+  <meta property="og:description" content="Smooth 2D Bead 16 (Sholo Guti) with multi-jump captures, local multiplayer, and smart offline AI." />
+  <meta property="og:type" content="website" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0f1115;
+      font-family: 'Inter', sans-serif;
+      color: #f3f4f6;
+      touch-action: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-modal {
+      animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-between h-full w-full relative">
+
+  <!-- ==================== MAIN MENU OVERLAY ==================== -->
+  <div id="mainMenu" class="fixed inset-0 z-40 flex items-center justify-center bg-[#0f1115] p-4 overflow-y-auto">
+    <div class="w-full max-w-md bg-[#181b22] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col gap-4 animate-modal my-auto">
+      
+      <!-- Top Bar: Badge & Audio Toggle -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Offline 2D Strategy
+        </div>
+        <button id="menuSoundBtn" onclick="toggleSound()" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Toggle Sound">
+          <svg id="menuSoundIconOn" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
+          <svg id="menuSoundIconOff" class="w-5 h-5 hidden text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mini Board Logo & Title -->
+      <div class="text-center flex flex-col items-center gap-1.5">
+        <div class="w-16 h-16 rounded-2xl bg-[#ebd9c0] border-4 border-[#3a2618] shadow-inner flex items-center justify-center relative">
+          <!-- Mini Sholo Guti Lines -->
+          <svg class="w-12 h-12 text-[#5c3a21]" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polygon points="12,4 28,4 20,12" />
+            <rect x="8" y="12" width="24" height="16" />
+            <line x1="8" y1="12" x2="32" y2="28" />
+            <line x1="32" y1="12" x2="8" y2="28" />
+            <polygon points="20,28 12,36 28,36" />
+          </svg>
+          <span class="w-3 h-3 rounded-full bg-rose-500 border border-white absolute top-2.5"></span>
+          <span class="w-3 h-3 rounded-full bg-sky-500 border border-white absolute bottom-2.5"></span>
+        </div>
+        <h1 class="text-3xl font-extrabold tracking-tight text-white mt-1">
+          BEAD <span class="text-amber-500">16</span>
+        </h1>
+        <p id="variantDescText" class="text-xs text-gray-400">Classic Sholo Guti &bull; 37 Nodes &bull; Multi-Jump Captures</p>
+      </div>
+
+      <!-- Board Variant Selector -->
+      <div class="flex flex-col gap-1.5">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 px-1">Board Variant</span>
+        <div class="grid grid-cols-2 gap-2.5">
+          <button onclick="selectVariant('16')" id="var16Btn" class="p-3 rounded-2xl border-2 border-amber-500 bg-amber-500/15 flex flex-col items-center gap-0.5 transition">
+            <span class="text-xs font-extrabold text-white">Classic 16 Beads</span>
+            <span class="text-[10px] text-gray-400">Full 37-Node Board</span>
+          </button>
+          <button onclick="selectVariant('12')" id="var12Btn" class="p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-0.5 transition">
+            <span class="text-xs font-extrabold text-white">Fast 12 Beads</span>
+            <span class="text-[10px] text-gray-400">5×5 Quick Alquerque</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode Selection -->
+      <div class="grid grid-cols-2 gap-3">
+        <button id="modeFriendBtn" onclick="selectMode('friend')" class="p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 flex flex-col items-center gap-1 transition">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span class="text-sm font-bold text-white">Play with Friend</span>
+          <span class="text-[11px] text-gray-400">2P Pass &amp; Play</span>
+        </button>
+
+        <button id="modeAiBtn" onclick="selectMode('ai')" class="p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1 transition">
+          <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span class="text-sm font-bold text-white">vs Computer</span>
+          <span class="text-[11px] text-gray-400">Smart Offline AI</span>
+        </button>
+      </div>
+
+      <!-- AI Difficulty Selector (Shown when vs Computer is selected) -->
+      <div id="aiDifficultyRow" class="hidden flex-col gap-2 bg-white/5 p-3 rounded-2xl border border-white/10">
+        <div class="flex items-center justify-between text-xs text-gray-400 font-semibold px-1">
+          <span>AI DIFFICULTY</span>
+          <span id="aiDiffLabel" class="text-sky-400">Medium</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="selectDifficulty('easy')" id="diffEasy" class="py-1.5 rounded-xl text-xs font-bold border border-white/10 bg-white/5 text-gray-300 transition">Easy</button>
+          <button onclick="selectDifficulty('medium')" id="diffMedium" class="py-1.5 rounded-xl text-xs font-bold border border-sky-500 bg-sky-500/20 text-white transition">Medium</button>
+          <button onclick="selectDifficulty('pro')" id="diffPro" class="py-1.5 rounded-xl text-xs font-bold border border-white/10 bg-white/5 text-gray-300 transition">Pro</button>
+        </div>
+      </div>
+
+      <!-- Board Theme Selector -->
+      <div class="flex items-center justify-between bg-white/5 px-4 py-2.5 rounded-2xl border border-white/10">
+        <div class="flex flex-col">
+          <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Board Theme</span>
+          <span id="themeNameLabel" class="text-xs text-gray-200 font-medium mt-0.5">Classic Birch</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <button onclick="selectTheme('birch')" id="themeBtn_birch" class="w-7 h-7 rounded-full bg-[#ecdcc2] border-2 border-white ring-2 ring-amber-500 transition transform scale-110" title="Classic Birch"></button>
+          <button onclick="selectTheme('slate')" id="themeBtn_slate" class="w-7 h-7 rounded-full bg-[#1e293b] border-2 border-slate-400 transition opacity-70 hover:opacity-100" title="Midnight Slate"></button>
+          <button onclick="selectTheme('emerald')" id="themeBtn_emerald" class="w-7 h-7 rounded-full bg-[#14532d] border-2 border-emerald-400 transition opacity-70 hover:opacity-100" title="Tournament Emerald"></button>
+          <button onclick="selectTheme('ocean')" id="themeBtn_ocean" class="w-7 h-7 rounded-full bg-[#164e63] border-2 border-cyan-400 transition opacity-70 hover:opacity-100" title="Ocean Minimal"></button>
+        </div>
+      </div>
+
+      <!-- Start Game CTA -->
+      <button onclick="startNewMatch()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 active:scale-[0.99] text-white font-extrabold text-base tracking-wide shadow-lg shadow-orange-600/25 transition">
+        START MATCH
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ==================== GAMEPLAY HUD & BOARD ==================== -->
+  <div id="gameContainer" class="w-full h-full max-w-xl mx-auto flex flex-col justify-between p-2.5 sm:p-4 select-none">
+    
+    <!-- Top HUD Bar -->
+    <div class="w-full flex items-center justify-between gap-2 bg-[#181b22] border border-white/10 rounded-2xl p-2.5 shadow-lg">
+      
+      <!-- Player 1 (Bottom - Sky Blue) Score Card -->
+      <div id="p1Card" class="flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-sky-500 bg-sky-500/10 transition-all">
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            <span id="p1TurnDot" class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-sky-300">Player 1</span>
+          </div>
+          <div class="flex items-baseline gap-1 mt-0.5">
+            <span id="p1Captured" class="text-2xl font-extrabold text-white leading-none">0</span>
+            <span id="p1TargetLabel" class="text-[11px] text-gray-400 font-semibold">/ 16 won</span>
+          </div>
+        </div>
+        <div class="text-right text-[10px] text-gray-400 font-medium leading-tight">
+          <div>Active</div>
+          <div id="p1Remaining" class="text-sky-300 font-bold mt-0.5">16 beads</div>
+        </div>
+      </div>
+
+      <!-- Center Status Pill & Controls -->
+      <div class="flex flex-col items-center justify-center px-1.5 min-w-[115px] text-center">
+        <span id="statusBanner" class="text-xs font-bold text-amber-400 tracking-wide truncate max-w-[130px]">Player 1's Turn</span>
+        <div class="flex items-center gap-1.5 mt-1.5">
+          <button onclick="cycleThemeInGame()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Change Board Theme">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+          </button>
+          <button onclick="toggleSound()" id="hudSoundBtn" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Mute / Unmute">
+            <svg id="hudSoundOn" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>
+            <svg id="hudSoundOff" class="w-3.5 h-3.5 hidden text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+            </svg>
+          </button>
+          <button onclick="openMainMenu()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Main Menu">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Player 2 / AI (Top - Rose Red) Score Card -->
+      <div id="p2Card" class="flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-white/10 bg-white/5 opacity-75 transition-all">
+        <div class="text-left text-[10px] text-gray-400 font-medium leading-tight">
+          <div>Active</div>
+          <div id="p2Remaining" class="text-rose-300 font-bold mt-0.5">16 beads</div>
+        </div>
+        <div class="flex flex-col items-end">
+          <div class="flex items-center gap-1.5">
+            <span id="p2Name" class="text-[11px] font-bold uppercase tracking-wider text-rose-300">Player 2</span>
+            <span id="p2TurnDot" class="w-2 h-2 rounded-full bg-rose-400 animate-ping hidden"></span>
+          </div>
+          <div class="flex items-baseline gap-1 mt-0.5">
+            <span id="p2Captured" class="text-2xl font-extrabold text-white leading-none">0</span>
+            <span id="p2TargetLabel" class="text-[11px] text-gray-400 font-semibold">/ 16 won</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Legend / Rules Mini Strip -->
+    <div class="flex items-center justify-center gap-3 text-[11px] text-gray-400 py-0.5">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-sky-400 inline-block"></span>
+        <span>Step Move</span>
+      </div>
+      <span>&bull;</span>
+      <div class="flex items-center gap-1.5">
+        <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>
+        <span>Jump Capture (Chainable!)</span>
+      </div>
+    </div>
+
+    <!-- Center Board Wrapper -->
+    <div id="boardWrapper" class="flex-1 w-full flex items-center justify-center overflow-hidden my-1">
+      <div class="relative aspect-square max-h-full max-w-full flex items-center justify-center shadow-2xl rounded-3xl">
+        <canvas id="beadCanvas" width="700" height="700" class="w-full h-full rounded-3xl touch-none cursor-pointer"></canvas>
+      </div>
+    </div>
+
+    <!-- Bottom Tactical Control Bar -->
+    <div class="w-full bg-[#181b22] border border-white/10 rounded-2xl px-4 py-2.5 shadow-lg flex items-center justify-between gap-3">
+      <div class="flex flex-col min-w-0">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Tactical Guide</span>
+        <span id="bottomHintText" class="text-xs text-sky-400 font-medium truncate mt-0.5">Tap any of your beads to view legal moves</span>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- End Chain Jump Button (Appears during multi-jump sequences) -->
+        <button
+          id="endChainBtn"
+          onclick="finishChainTurn()"
+          class="hidden px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-xs font-extrabold text-white shadow-md shadow-emerald-600/25 transition"
+        >
+          End Turn
+        </button>
+
+        <button
+          id="hintBtn"
+          onclick="triggerSmartHint()"
+          class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-amber-400 transition flex items-center gap-1.5"
+          title="Suggest Best Move"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+          <span>Hint</span>
+        </button>
+
+        <button
+          onclick="startNewMatch()"
+          class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-gray-300 transition"
+        >
+          Restart
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== GAME OVER MODAL ==================== -->
+  <div id="gameOverModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="w-full max-w-sm bg-[#181b22] border border-white/15 rounded-3xl p-6 text-center shadow-2xl flex flex-col gap-5 animate-modal">
+      <div class="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 mx-auto flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+      </div>
+
+      <div>
+        <p class="text-xs font-bold uppercase tracking-widest text-amber-400">Match Complete</p>
+        <h2 id="winnerTitle" class="text-2xl font-extrabold text-white mt-1">Player 1 Wins!</h2>
+        <p id="winnerSubtitle" class="text-xs text-gray-400 mt-1">All opponent beads captured</p>
+      </div>
+
+      <!-- Final Score Comparison -->
+      <div class="grid grid-cols-2 gap-3 bg-white/5 p-3.5 rounded-2xl border border-white/10">
+        <div class="flex flex-col items-center border-r border-white/10 pr-2">
+          <span class="text-xs text-sky-400 font-bold uppercase">Player 1</span>
+          <span id="finalP1Score" class="text-3xl font-extrabold text-white mt-1">16</span>
+          <span class="text-[11px] text-gray-400">captured</span>
+        </div>
+        <div class="flex flex-col items-center pl-2">
+          <span id="finalP2Name" class="text-xs text-rose-400 font-bold uppercase">Player 2</span>
+          <span id="finalP2Score" class="text-3xl font-extrabold text-white mt-1">0</span>
+          <span class="text-[11px] text-gray-400">captured</span>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button onclick="openMainMenu()" class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-bold text-sm transition">
+          Main Menu
+        </button>
+        <button onclick="startNewMatch()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold text-sm shadow-lg shadow-orange-600/25 transition">
+          Play Again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== GAME SCRIPT ==================== -->
+  <script>
+    /**************************************************************
+     * 1. SOUND SYNTHESIZER (Web Audio API - 100% Offline)
+     **************************************************************/
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('menuSoundIconOn').classList.toggle('hidden', !soundEnabled);
+      document.getElementById('menuSoundIconOff').classList.toggle('hidden', soundEnabled);
+      document.getElementById('hudSoundOn').classList.toggle('hidden', !soundEnabled);
+      document.getElementById('hudSoundOff').classList.toggle('hidden', soundEnabled);
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+
+      if (type === 'select') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.exponentialRampToValueAtTime(680, now + 0.05);
+        gain.gain.setValueAtTime(0.16, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.055);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.06);
+      } else if (type === 'step') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(160, now + 0.065);
+        gain.gain.setValueAtTime(0.24, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.075);
+      } else if (type === 'capture') {
+        const notes = [420, 680];
+        notes.forEach((f, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, now + idx * 0.055);
+          gain.gain.setValueAtTime(0.28, now + idx * 0.055);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.14);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.055);
+          osc.stop(now + idx * 0.055 + 0.15);
+        });
+      } else if (type === 'hint') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(640, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.11);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.13);
+      } else if (type === 'win') {
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.085);
+          gain.gain.setValueAtTime(0.26, now + idx * 0.085);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.085 + 0.34);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.085);
+          osc.stop(now + idx * 0.085 + 0.35);
+        });
+      }
+    }
+
+    /**************************************************************
+     * 2. BOARD THEMES & CONFIGURATION
+     **************************************************************/
+    const THEMES = {
+      birch: {
+        name: 'Classic Birch',
+        frameOuter: '#2b1b12',
+        frameInner: '#472e1f',
+        surface: '#ebd9c0',
+        surfaceVignette: '#dec6a4',
+        lineColor: '#5c3a21',
+        nodeFill: '#855836'
+      },
+      slate: {
+        name: 'Midnight Slate',
+        frameOuter: '#090d16',
+        frameInner: '#1e293b',
+        surface: '#111827',
+        surfaceVignette: '#0b0f19',
+        lineColor: '#475569',
+        nodeFill: '#94a3b8'
+      },
+      emerald: {
+        name: 'Tournament Emerald',
+        frameOuter: '#14261c',
+        frameInner: '#1e3a2b',
+        surface: '#134e32',
+        surfaceVignette: '#0d3b24',
+        lineColor: '#52b788',
+        nodeFill: '#a7f3d0'
+      },
+      ocean: {
+        name: 'Ocean Minimal',
+        frameOuter: '#0c1926',
+        frameInner: '#152c42',
+        surface: '#164e63',
+        surfaceVignette: '#0e3a4c',
+        lineColor: '#38bdf8',
+        nodeFill: '#bae6fd'
+      }
+    };
+
+    const THEME_KEYS = Object.keys(THEMES);
+    let currentThemeKey = 'birch';
+
+    let boardVariant = '16';   // '16' (37-node Sholo Guti) | '12' (25-node 5x5 Alquerque)
+    let gameMode = 'friend';   // 'friend' | 'ai'
+    let aiDifficulty = 'medium'; // 'easy' | 'medium' | 'pro'
+
+    /**************************************************************
+     * 3. SHOLO GUTI (BEAD 16) 37-NODE GEOMETRY & LINE GRAPH
+     **************************************************************/
+    const SIZE = 700;
+    const CENTER = SIZE / 2;
+    const FRAME_WIDTH = 34;
+    const PLAY_MIN = FRAME_WIDTH;
+    const PLAY_MAX = SIZE - FRAME_WIDTH;
+
+    const canvas = document.getElementById('beadCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Graph structures built dynamically for 16-bead (37 nodes) or 12-bead (25 nodes)
+    let nodes = [];           // { id, key, r, c, x, y, occupant: null | 1 | 2 }
+    let keyToId = new Map();  // "r,c" -> node id
+    let boardLines = [];      // Array of node-id arrays representing straight playable lines
+    let stepAdj = [];         // stepAdj[u] = [v1, v2, ...]
+    let jumpMovesFrom = [];   // jumpMovesFrom[u] = [{ over: midId, to: destId }, ...]
+
+    function buildBoardGraph() {
+      nodes = [];
+      keyToId.clear();
+      boardLines = [];
+
+      // 5x5 Central Square Coordinates (r = 2..6, c = 0..4)
+      // Col spacing = 110px (x: 130..570), Row spacing = 80px (y: 190..510)
+      // Triangle rows use exact collinear slope so diagonal jumps into triangles are 100% straight!
+      const addNode = (r, c, x, y) => {
+        const id = nodes.length;
+        const key = `${r},${c}`;
+        nodes.push({ id, key, r, c, x, y, occupant: null });
+        keyToId.set(key, id);
+      };
+
+      if (boardVariant === '16') {
+        // Top Triangle (6 nodes: r=0 and r=1)
+        const y0 = 62;
+        const y1 = 126;
+        const dx1 = 64 * (110 / 80); // 88px
+        const dx0 = 128 * (110 / 80); // 176px
+        addNode(0, 1, CENTER - dx0, y0);
+        addNode(0, 2, CENTER,       y0);
+        addNode(0, 3, CENTER + dx0, y0);
+        addNode(1, 1, CENTER - dx1, y1);
+        addNode(1, 2, CENTER,       y1);
+        addNode(1, 3, CENTER + dx1, y1);
+      }
+
+      // 5x5 Main Square (25 nodes: r=2..6, c=0..4)
+      const startY = boardVariant === '16' ? 190 : 130;
+      const rowStep = boardVariant === '16' ? 80 : 110;
+      const startX = 130;
+      const colStep = 110;
+
+      for (let r = 2; r <= 6; r++) {
+        for (let c = 0; c <= 4; c++) {
+          addNode(r, c, startX + c * colStep, startY + (r - 2) * rowStep);
+        }
+      }
+
+      if (boardVariant === '16') {
+        // Bottom Triangle (6 nodes: r=7 and r=8)
+        const y7 = 574;
+        const y8 = 638;
+        const dx7 = 64 * (110 / 80); // 88px
+        const dx8 = 128 * (110 / 80); // 176px
+        addNode(7, 1, CENTER - dx7, y7);
+        addNode(7, 2, CENTER,       y7);
+        addNode(7, 3, CENTER + dx7, y7);
+        addNode(8, 1, CENTER - dx8, y8);
+        addNode(8, 2, CENTER,       y8);
+        addNode(8, 3, CENTER + dx8, y8);
+      }
+
+      const getIds = (coords) => coords.map(([r, c]) => keyToId.get(`${r},${c}`)).filter(id => id !== undefined);
+
+      // 1. Horizontal Lines
+      if (boardVariant === '16') {
+        boardLines.push(getIds([[0,1], [0,2], [0,3]]));
+        boardLines.push(getIds([[1,1], [1,2], [1,3]]));
+      }
+      for (let r = 2; r <= 6; r++) {
+        boardLines.push(getIds([[r,0], [r,1], [r,2], [r,3], [r,4]]));
+      }
+      if (boardVariant === '16') {
+        boardLines.push(getIds([[7,1], [7,2], [7,3]]));
+        boardLines.push(getIds([[8,1], [8,2], [8,3]]));
+      }
+
+      // 2. Vertical Lines
+      boardLines.push(getIds([[2,0], [3,0], [4,0], [5,0], [6,0]]));
+      boardLines.push(getIds([[2,1], [3,1], [4,1], [5,1], [6,1]]));
+      if (boardVariant === '16') {
+        boardLines.push(getIds([[0,2], [1,2], [2,2], [3,2], [4,2], [5,2], [6,2], [7,2], [8,2]]));
+      } else {
+        boardLines.push(getIds([[2,2], [3,2], [4,2], [5,2], [6,2]]));
+      }
+      boardLines.push(getIds([[2,3], [3,3], [4,3], [5,3], [6,3]]));
+      boardLines.push(getIds([[2,4], [3,4], [4,4], [5,4], [6,4]]));
+
+      // 3. Main 5x5 Diagonals
+      boardLines.push(getIds([[2,0], [3,1], [4,2], [5,3], [6,4]]));
+      boardLines.push(getIds([[2,4], [3,3], [4,2], [5,1], [6,0]]));
+
+      // 4. Diamond + Collinear Triangle Rays
+      if (boardVariant === '16') {
+        boardLines.push(getIds([[4,0], [3,1], [2,2], [1,3], [0,3]]));
+        boardLines.push(getIds([[4,4], [3,3], [2,2], [1,1], [0,1]]));
+        boardLines.push(getIds([[4,0], [5,1], [6,2], [7,3], [8,3]]));
+        boardLines.push(getIds([[4,4], [5,3], [6,2], [7,1], [8,1]]));
+      } else {
+        boardLines.push(getIds([[4,0], [3,1], [2,2]]));
+        boardLines.push(getIds([[4,4], [3,3], [2,2]]));
+        boardLines.push(getIds([[4,0], [5,1], [6,2]]));
+        boardLines.push(getIds([[4,4], [5,3], [6,2]]));
+      }
+
+      // Build Step Adjacency and Collinear Jump Table
+      stepAdj = Array.from({ length: nodes.length }, () => []);
+      jumpMovesFrom = Array.from({ length: nodes.length }, () => []);
+
+      for (const line of boardLines) {
+        for (let i = 0; i < line.length; i++) {
+          const u = line[i];
+          if (i + 1 < line.length) {
+            const v = line[i + 1];
+            if (!stepAdj[u].includes(v)) stepAdj[u].push(v);
+            if (!stepAdj[v].includes(u)) stepAdj[v].push(u);
+          }
+          if (i + 2 < line.length) {
+            const mid = line[i + 1];
+            const w = line[i + 2];
+            jumpMovesFrom[u].push({ over: mid, to: w });
+            jumpMovesFrom[w].push({ over: mid, to: u });
+          }
+        }
+      }
+    }
+
+    /**************************************************************
+     * 4. GAME STATE & TURN MANAGEMENT
+     **************************************************************/
+    let currentPlayer = 1; // 1 = Bottom (Sky Blue), 2 = Top (Rose Red / AI)
+    let gameState = 'SELECT'; // 'SELECT' | 'CHAIN_JUMP' | 'ANIMATING' | 'AI_THINKING' | 'GAME_OVER'
+    let selectedNodeId = null;
+    let legalMovesForSelected = []; // [{ type: 'step'|'jump', from, to, over? }]
+    let hintMove = null;
+    let chainCount = 0;
+    let totalBeadsPerPlayer = 16;
+    let capturedCount = { 1: 0, 2: 0 };
+
+    // Visual animations
+    let movingBeadAnim = null; // { player, x, y }
+    let particles = [];
+    let floatingTexts = [];
+    let pulseTick = 0;
+    let aiTimeoutId = null;
+
+    /**************************************************************
+     * 5. MENU & UI HANDLERS
+     **************************************************************/
+    function selectVariant(v) {
+      boardVariant = v;
+      const btn16 = document.getElementById('var16Btn');
+      const btn12 = document.getElementById('var12Btn');
+      const desc = document.getElementById('variantDescText');
+
+      if (v === '16') {
+        btn16.className = 'p-3 rounded-2xl border-2 border-amber-500 bg-amber-500/15 flex flex-col items-center gap-0.5 transition';
+        btn12.className = 'p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-0.5 transition';
+        desc.innerHTML = 'Classic Sholo Guti &bull; 37 Nodes &bull; Multi-Jump Captures';
+      } else {
+        btn12.className = 'p-3 rounded-2xl border-2 border-amber-500 bg-amber-500/15 flex flex-col items-center gap-0.5 transition';
+        btn16.className = 'p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-0.5 transition';
+        desc.innerHTML = 'Fast 12-Bead Alquerque &bull; 25 Nodes &bull; Quick Tactical Battles';
+      }
+    }
+
+    function selectMode(mode) {
+      gameMode = mode;
+      const friendBtn = document.getElementById('modeFriendBtn');
+      const aiBtn = document.getElementById('modeAiBtn');
+      const aiRow = document.getElementById('aiDifficultyRow');
+
+      if (mode === 'friend') {
+        friendBtn.className = 'p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 flex flex-col items-center gap-1 transition';
+        aiBtn.className = 'p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1 transition';
+        aiRow.classList.add('hidden');
+        aiRow.classList.remove('flex');
+      } else {
+        aiBtn.className = 'p-3 rounded-2xl border-2 border-sky-500 bg-sky-500/10 flex flex-col items-center gap-1 transition';
+        friendBtn.className = 'p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1 transition';
+        aiRow.classList.remove('hidden');
+        aiRow.classList.add('flex');
+      }
+    }
+
+    function selectDifficulty(diff) {
+      aiDifficulty = diff;
+      const labels = { easy: 'Easy', medium: 'Medium', pro: 'Pro' };
+      document.getElementById('aiDiffLabel').textContent = labels[diff];
+
+      ['easy', 'medium', 'pro'].forEach(d => {
+        const btn = document.getElementById('diff' + d.charAt(0).toUpperCase() + d.slice(1));
+        if (d === diff) {
+          btn.className = 'py-1.5 rounded-xl text-xs font-bold border border-sky-500 bg-sky-500/20 text-white transition';
+        } else {
+          btn.className = 'py-1.5 rounded-xl text-xs font-bold border border-white/10 bg-white/5 text-gray-300 transition';
+        }
+      });
+    }
+
+    function selectTheme(themeKey) {
+      currentThemeKey = themeKey;
+      document.getElementById('themeNameLabel').textContent = THEMES[themeKey].name;
+      THEME_KEYS.forEach(k => {
+        const btn = document.getElementById('themeBtn_' + k);
+        if (k === themeKey) {
+          btn.classList.add('ring-2', 'ring-amber-500', 'scale-110', 'border-white');
+          btn.classList.remove('opacity-70');
+        } else {
+          btn.classList.remove('ring-2', 'ring-amber-500', 'scale-110', 'border-white');
+          btn.classList.add('opacity-70');
+        }
+      });
+    }
+
+    function cycleThemeInGame() {
+      const idx = THEME_KEYS.indexOf(currentThemeKey);
+      selectTheme(THEME_KEYS[(idx + 1) % THEME_KEYS.length]);
+    }
+
+    function openMainMenu() {
+      if (aiTimeoutId) clearTimeout(aiTimeoutId);
+      document.getElementById('gameOverModal').classList.add('hidden');
+      document.getElementById('gameOverModal').classList.remove('flex');
+      document.getElementById('mainMenu').classList.remove('hidden');
+      document.getElementById('mainMenu').classList.add('flex');
+    }
+
+    /**************************************************************
+     * 6. MATCH INITIALIZATION & INITIAL BEAD PLACEMENT
+     **************************************************************/
+    function startNewMatch() {
+      if (aiTimeoutId) clearTimeout(aiTimeoutId);
+      getAudioCtx();
+
+      document.getElementById('mainMenu').classList.add('hidden');
+      document.getElementById('mainMenu').classList.remove('flex');
+      document.getElementById('gameOverModal').classList.add('hidden');
+      document.getElementById('gameOverModal').classList.remove('flex');
+
+      buildBoardGraph();
+
+      totalBeadsPerPlayer = boardVariant === '16' ? 16 : 12;
+      capturedCount = { 1: 0, 2: 0 };
+
+      // Place initial beads
+      for (const node of nodes) {
+        if (boardVariant === '16') {
+          // Top Player (2) occupies rows 0, 1, 2, 3 (16 beads)
+          // Row 4 is completely empty (5 middle nodes)
+          // Bottom Player (1) occupies rows 5, 6, 7, 8 (16 beads)
+          if (node.r <= 3) node.occupant = 2;
+          else if (node.r >= 5) node.occupant = 1;
+          else node.occupant = null;
+        } else {
+          // 12-Bead Fast Alquerque:
+          // Top Player (2) occupies r=2, 3 (10) + r=4, c=0,1 (2) = 12 beads
+          // Center (r=4, c=2) is empty
+          // Bottom Player (1) occupies r=5, 6 (10) + r=4, c=3,4 (2) = 12 beads
+          if (node.r < 4 || (node.r === 4 && node.c < 2)) node.occupant = 2;
+          else if (node.r > 4 || (node.r === 4 && node.c > 2)) node.occupant = 1;
+          else node.occupant = null;
+        }
+      }
+
+      document.getElementById('p1TargetLabel').textContent = `/ ${totalBeadsPerPlayer} won`;
+      document.getElementById('p2TargetLabel').textContent = `/ ${totalBeadsPerPlayer} won`;
+      document.getElementById('p2Name').textContent = gameMode === 'ai' ? 'Computer' : 'Player 2';
+      document.getElementById('finalP2Name').textContent = gameMode === 'ai' ? 'Computer' : 'Player 2';
+
+      currentPlayer = 1;
+      selectedNodeId = null;
+      legalMovesForSelected = [];
+      hintMove = null;
+      chainCount = 0;
+      particles = [];
+      floatingTexts = [];
+
+      prepareTurn();
+    }
+
+    function prepareTurn() {
+      selectedNodeId = null;
+      legalMovesForSelected = [];
+      hintMove = null;
+      chainCount = 0;
+
+      document.getElementById('endChainBtn').classList.add('hidden');
+
+      // Check if currentPlayer has any remaining beads or any legal moves
+      const allMoves = getAllLegalMovesForPlayer(currentPlayer);
+      if (allMoves.length === 0) {
+        const winner = currentPlayer === 1 ? 2 : 1;
+        triggerGameOver(winner);
+        return;
+      }
+
+      if (gameMode === 'ai' && currentPlayer === 2) {
+        gameState = 'AI_THINKING';
+        updateHUD("Computer's Turn");
+        document.getElementById('bottomHintText').textContent = 'Computer is calculating tactical lines...';
+        document.getElementById('hintBtn').disabled = true;
+        aiTimeoutId = setTimeout(executeAITurn, 580);
+      } else {
+        gameState = 'SELECT';
+        const pLabel = currentPlayer === 1 ? "Player 1's Turn" : "Player 2's Turn";
+        updateHUD(pLabel);
+        document.getElementById('bottomHintText').textContent = `${pLabel}: Tap one of your beads to view moves`;
+        document.getElementById('hintBtn').disabled = false;
+      }
+    }
+
+    function updateHUD(statusText) {
+      const p1Rem = nodes.filter(n => n.occupant === 1).length + (movingBeadAnim && movingBeadAnim.player === 1 ? 1 : 0);
+      const p2Rem = nodes.filter(n => n.occupant === 2).length + (movingBeadAnim && movingBeadAnim.player === 2 ? 1 : 0);
+
+      document.getElementById('p1Captured').textContent = capturedCount[1];
+      document.getElementById('p2Captured').textContent = capturedCount[2];
+      document.getElementById('p1Remaining').textContent = `${p1Rem} beads`;
+      document.getElementById('p2Remaining').textContent = `${p2Rem} beads`;
+      document.getElementById('statusBanner').textContent = statusText;
+
+      const p1Card = document.getElementById('p1Card');
+      const p2Card = document.getElementById('p2Card');
+      const p1Dot = document.getElementById('p1TurnDot');
+      const p2Dot = document.getElementById('p2TurnDot');
+
+      if (currentPlayer === 1) {
+        p1Card.className = 'flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-sky-500 bg-sky-500/10 transition-all';
+        p2Card.className = 'flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-white/10 bg-white/5 opacity-70 transition-all';
+        p1Dot.classList.remove('hidden');
+        p2Dot.classList.add('hidden');
+      } else {
+        p2Card.className = 'flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-rose-500 bg-rose-500/10 transition-all';
+        p1Card.className = 'flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-white/10 bg-white/5 opacity-70 transition-all';
+        p2Dot.classList.remove('hidden');
+        p1Dot.classList.add('hidden');
+      }
+    }
+
+    /**************************************************************
+     * 7. MOVE GENERATION & MULTI-JUMP CHAIN LOGIC
+     **************************************************************/
+    function getMovesForNode(nodeId, player, jumpsOnly = false, boardState = null) {
+      const getOcc = (id) => boardState ? boardState[id] : nodes[id].occupant;
+      if (getOcc(nodeId) !== player) return [];
+
+      const opponent = player === 1 ? 2 : 1;
+      const moves = [];
+
+      // 1. Check Jump Captures
+      for (const j of jumpMovesFrom[nodeId]) {
+        if (getOcc(j.over) === opponent && getOcc(j.to) === null) {
+          moves.push({ type: 'jump', from: nodeId, over: j.over, to: j.to });
+        }
+      }
+
+      // 2. Check 1-Step Adjacent Moves (unless restricted to chain jumps)
+      if (!jumpsOnly) {
+        for (const nb of stepAdj[nodeId]) {
+          if (getOcc(nb) === null) {
+            moves.push({ type: 'step', from: nodeId, to: nb });
+          }
+        }
+      }
+
+      return moves;
+    }
+
+    function getAllLegalMovesForPlayer(player, jumpsOnly = false, boardState = null) {
+      const all = [];
+      for (let id = 0; id < nodes.length; id++) {
+        const occ = boardState ? boardState[id] : nodes[id].occupant;
+        if (occ === player) {
+          all.push(...getMovesForNode(id, player, jumpsOnly, boardState));
+        }
+      }
+      return all;
+    }
+
+    function executeMove(move) {
+      gameState = 'ANIMATING';
+      hintMove = null;
+      legalMovesForSelected = [];
+
+      const fromNode = nodes[move.from];
+      const toNode = nodes[move.to];
+      const activeP = currentPlayer;
+
+      fromNode.occupant = null;
+      movingBeadAnim = {
+        player: activeP,
+        x: fromNode.x,
+        y: fromNode.y
+      };
+
+      const startTime = performance.now();
+      const duration = move.type === 'jump' ? 250 : 185;
+
+      function tickAnim(now) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const ease = 1 - Math.pow(1 - t, 3);
+        const arcLift = move.type === 'jump' ? Math.sin(t * Math.PI) * 18 : 0;
+
+        movingBeadAnim.x = fromNode.x + (toNode.x - fromNode.x) * ease;
+        movingBeadAnim.y = fromNode.y + (toNode.y - fromNode.y) * ease - arcLift;
+
+        if (t < 1) {
+          requestAnimationFrame(tickAnim);
+        } else {
+          movingBeadAnim = null;
+          toNode.occupant = activeP;
+          onMoveAnimationFinished(move);
+        }
+      }
+      requestAnimationFrame(tickAnim);
+    }
+
+    function onMoveAnimationFinished(move) {
+      const toNode = nodes[move.to];
+
+      if (move.type === 'jump') {
+        const overNode = nodes[move.over];
+        const capturedOwner = overNode.occupant;
+        overNode.occupant = null;
+        capturedCount[currentPlayer]++;
+        chainCount++;
+
+        playSound('capture');
+        const burstColor = capturedOwner === 1 ? '#38bdf8' : '#fb7185';
+        spawnParticles(overNode.x, overNode.y, burstColor, 18);
+
+        const label = chainCount > 1 ? `${chainCount}× CHAIN CAPTURE!` : 'CAPTURED! +1';
+        spawnFloatingText(label, toNode.x, toNode.y - 24, '#fbbf24');
+
+        // Check if opponent is completely wiped out
+        const opponent = currentPlayer === 1 ? 2 : 1;
+        const oppRemaining = nodes.filter(n => n.occupant === opponent).length;
+        if (oppRemaining === 0) {
+          updateHUD('Match Over!');
+          triggerGameOver(currentPlayer);
+          return;
+        }
+
+        // Check for Multi-Jump Chain Continuation from landing node
+        const followUpJumps = getMovesForNode(move.to, currentPlayer, true);
+        if (followUpJumps.length > 0) {
+          selectedNodeId = move.to;
+          legalMovesForSelected = followUpJumps;
+
+          if (gameMode === 'ai' && currentPlayer === 2) {
+            gameState = 'AI_THINKING';
+            updateHUD('Computer Chain Jump!');
+            aiTimeoutId = setTimeout(() => {
+              // Pick highest-value continuation jump
+              const nextJump = followUpJumps[0];
+              executeMove(nextJump);
+            }, 380);
+          } else {
+            gameState = 'CHAIN_JUMP';
+            document.getElementById('endChainBtn').classList.remove('hidden');
+            updateHUD('Chain Jump Available!');
+            document.getElementById('bottomHintText').textContent = 'Tap amber target to chain another jump, or tap End Turn';
+          }
+          return;
+        }
+      } else {
+        playSound('step');
+      }
+
+      // Advance Turn
+      currentPlayer = currentPlayer === 1 ? 2 : 1;
+      prepareTurn();
+    }
+
+    function finishChainTurn() {
+      if (gameState !== 'CHAIN_JUMP') return;
+      document.getElementById('endChainBtn').classList.add('hidden');
+      currentPlayer = currentPlayer === 1 ? 2 : 1;
+      prepareTurn();
+    }
+
+    function triggerGameOver(winner) {
+      gameState = 'GAME_OVER';
+      document.getElementById('endChainBtn').classList.add('hidden');
+      document.getElementById('hintBtn').disabled = true;
+      playSound('win');
+
+      const p2Label = gameMode === 'ai' ? 'Computer' : 'Player 2';
+      const winName = winner === 1 ? 'Player 1' : p2Label;
+
+      document.getElementById('winnerTitle').textContent = `${winName} Wins!`;
+      document.getElementById('winnerSubtitle').textContent = `Captured ${capturedCount[winner]} opponent beads`;
+      document.getElementById('finalP1Score').textContent = capturedCount[1];
+      document.getElementById('finalP2Score').textContent = capturedCount[2];
+
+      const modal = document.getElementById('gameOverModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    /**************************************************************
+     * 8. SMART OFFLINE AI & TACTICAL HINT ENGINE
+     **************************************************************/
+    function executeAITurn() {
+      if (gameState !== 'AI_THINKING') return;
+      const bestMove = chooseBestMoveForPlayer(2, aiDifficulty);
+      if (bestMove) {
+        selectedNodeId = bestMove.from;
+        executeMove(bestMove);
+      }
+    }
+
+    function triggerSmartHint() {
+      if (gameState !== 'SELECT' && gameState !== 'CHAIN_JUMP') return;
+      getAudioCtx();
+
+      if (gameState === 'CHAIN_JUMP' && legalMovesForSelected.length > 0) {
+        hintMove = legalMovesForSelected[0];
+      } else {
+        hintMove = chooseBestMoveForPlayer(currentPlayer, 'pro');
+      }
+
+      if (hintMove) {
+        selectedNodeId = hintMove.from;
+        legalMovesForSelected = gameState === 'CHAIN_JUMP'
+          ? getMovesForNode(hintMove.from, currentPlayer, true)
+          : getMovesForNode(hintMove.from, currentPlayer, false);
+        playSound('hint');
+        const dest = nodes[hintMove.to];
+        spawnFloatingText('SUGGESTED', dest.x, dest.y - 22, '#fbbf24');
+      }
+    }
+
+    function chooseBestMoveForPlayer(player, difficulty) {
+      const state = nodes.map(n => n.occupant);
+      const allMoves = getAllLegalMovesForPlayer(player, false, state);
+      if (allMoves.length === 0) return null;
+
+      // Easy: 55% random move
+      if (difficulty === 'easy' && Math.random() < 0.55) {
+        return allMoves[Math.floor(Math.random() * allMoves.length)];
+      }
+
+      const opponent = player === 1 ? 2 : 1;
+      let bestMove = allMoves[0];
+      let bestScore = -Infinity;
+
+      for (const move of allMoves) {
+        const nextState = [...state];
+        let score = 0;
+
+        if (move.type === 'jump') {
+          nextState[move.from] = null;
+          nextState[move.over] = null;
+          nextState[move.to] = player;
+          score += 125;
+
+          // Check if this jump unlocks a multi-jump chain
+          const chainGain = simulateMaxChainJumps(nextState, move.to, player);
+          score += chainGain * 115;
+        } else {
+          nextState[move.from] = null;
+          nextState[move.to] = player;
+        }
+
+        // Positional Bonus: Prefer high-connectivity hub nodes (like (2,2), (4,2), (6,2), (3,1), (3,3), (5,1), (5,3))
+        score += stepAdj[move.to].length * 3.2;
+
+        // Lookahead Penalty: Check if opponent can jump us on their immediate response
+        if (difficulty !== 'easy') {
+          const oppJumps = getAllLegalMovesForPlayer(opponent, true, nextState);
+          if (oppJumps.length > 0) {
+            let maxOppChain = 1;
+            for (const oj of oppJumps) {
+              const s2 = [...nextState];
+              s2[oj.from] = null;
+              s2[oj.over] = null;
+              s2[oj.to] = opponent;
+              maxOppChain = Math.max(maxOppChain, 1 + simulateMaxChainJumps(s2, oj.to, opponent));
+            }
+            score -= maxOppChain * (difficulty === 'pro' ? 110 : 75);
+          }
+
+          // Pro Difficulty: Also check if moved piece was previously under threat and escaped!
+          if (difficulty === 'pro') {
+            const currentThreats = getAllLegalMovesForPlayer(opponent, true, state);
+            const wasThreatened = currentThreats.some(oj => oj.over === move.from);
+            if (wasThreatened) score += 60;
+          }
+        }
+
+        // Slight jitter to break ties naturally
+        score += (Math.random() - 0.5) * 4;
+
+        if (score > bestScore) {
+          bestScore = score;
+          bestMove = move;
+        }
+      }
+
+      return bestMove;
+    }
+
+    function simulateMaxChainJumps(simState, fromId, player) {
+      const jumps = getMovesForNode(fromId, player, true, simState);
+      if (jumps.length === 0) return 0;
+      let maxExtra = 0;
+      for (const j of jumps) {
+        const copy = [...simState];
+        copy[j.from] = null;
+        copy[j.over] = null;
+        copy[j.to] = player;
+        maxExtra = Math.max(maxExtra, 1 + simulateMaxChainJumps(copy, j.to, player));
+      }
+      return maxExtra;
+    }
+
+    /**************************************************************
+     * 9. CANVAS POINTER INTERACTION
+     **************************************************************/
+    function getCanvasCoords(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (SIZE / rect.width),
+        y: (clientY - rect.top) * (SIZE / rect.height)
+      };
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+      if (gameState !== 'SELECT' && gameState !== 'CHAIN_JUMP') return;
+      if (gameMode === 'ai' && currentPlayer === 2) return;
+      getAudioCtx();
+
+      const pt = getCanvasCoords(e);
+
+      // Find nearest node within click radius
+      let clickedNode = null;
+      let minDist = 34;
+      for (const node of nodes) {
+        const d = Math.hypot(pt.x - node.x, pt.y - node.y);
+        if (d < minDist) {
+          minDist = d;
+          clickedNode = node;
+        }
+      }
+
+      if (!clickedNode) return;
+
+      // 1. Check if clicked node is a legal destination for the currently selected bead
+      if (selectedNodeId !== null) {
+        const chosenMove = legalMovesForSelected.find(m => m.to === clickedNode.id);
+        if (chosenMove) {
+          executeMove(chosenMove);
+          return;
+        }
+      }
+
+      // 2. If in SELECT state, allow selecting any friendly bead
+      if (gameState === 'SELECT' && clickedNode.occupant === currentPlayer) {
+        selectedNodeId = clickedNode.id;
+        legalMovesForSelected = getMovesForNode(clickedNode.id, currentPlayer, false);
+        hintMove = null;
+        playSound('select');
+
+        if (legalMovesForSelected.length === 0) {
+          document.getElementById('bottomHintText').textContent = 'This bead is blocked — select another bead';
+        } else {
+          const hasJump = legalMovesForSelected.some(m => m.type === 'jump');
+          document.getElementById('bottomHintText').textContent = hasJump
+            ? 'Jump capture available! Tap the glowing amber target'
+            : 'Tap a highlighted node to move your bead';
+        }
+      }
+    });
+
+    /**************************************************************
+     * 10. RENDERING ENGINE (Minimal & Crisp 2D Canvas)
+     **************************************************************/
+    function spawnParticles(x, y, color, count = 15) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1.5 + Math.random() * 4.5;
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          radius: 2.5 + Math.random() * 3,
+          color,
+          alpha: 1
+        });
+      }
+    }
+
+    function spawnFloatingText(text, x, y, color) {
+      floatingTexts.push({ text, x, y, color, alpha: 1, dy: -1.1 });
+    }
+
+    function drawBoard() {
+      const theme = THEMES[currentThemeKey];
+
+      // 1. Outer Frame
+      ctx.fillStyle = theme.frameOuter;
+      ctx.fillRect(0, 0, SIZE, SIZE);
+
+      ctx.fillStyle = theme.frameInner;
+      ctx.beginPath();
+      ctx.roundRect(10, 10, SIZE - 20, SIZE - 20, 26);
+      ctx.fill();
+
+      // 2. Playing Surface with Radial Gradient
+      const grad = ctx.createRadialGradient(CENTER, CENTER, 40, CENTER, CENTER, SIZE * 0.65);
+      grad.addColorStop(0, theme.surface);
+      grad.addColorStop(1, theme.surfaceVignette);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect(PLAY_MIN, PLAY_MIN, PLAY_MAX - PLAY_MIN, PLAY_MAX - PLAY_MIN, 18);
+      ctx.fill();
+
+      // 3. Draw All Straight Board Lines
+      ctx.save();
+      ctx.strokeStyle = theme.lineColor;
+      ctx.lineWidth = 3.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      for (const line of boardLines) {
+        if (line.length < 2) continue;
+        const first = nodes[line[0]];
+        const last = nodes[line[line.length - 1]];
+        ctx.beginPath();
+        ctx.moveTo(first.x, first.y);
+        ctx.lineTo(last.x, last.y);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // 4. Draw Intersection Sockets
+      for (const node of nodes) {
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 6.5, 0, Math.PI * 2);
+        ctx.fillStyle = theme.nodeFill;
+        ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = theme.lineColor;
+        ctx.stroke();
+      }
+    }
+
+    function drawLegalMoveGuides() {
+      if (selectedNodeId === null || legalMovesForSelected.length === 0) return;
+
+      const fromNode = nodes[selectedNodeId];
+
+      for (const m of legalMovesForSelected) {
+        const toNode = nodes[m.to];
+        const isJump = m.type === 'jump';
+        const isHinted = hintMove && hintMove.from === m.from && hintMove.to === m.to;
+        const color = isJump ? '#f59e0b' : '#38bdf8';
+
+        ctx.save();
+        // Dashed Connector Line
+        ctx.beginPath();
+        ctx.moveTo(fromNode.x, fromNode.y);
+        ctx.lineTo(toNode.x, toNode.y);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = isJump ? 3.5 : 2.5;
+        ctx.setLineDash([6, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Pulsing Target Ring on Destination Node
+        const pulse = Math.sin(pulseTick * 0.14) * 3;
+        ctx.beginPath();
+        ctx.arc(toNode.x, toNode.y, 16 + pulse, 0, Math.PI * 2);
+        ctx.fillStyle = isJump ? 'rgba(245, 158, 11, 0.25)' : 'rgba(56, 189, 248, 0.22)';
+        ctx.fill();
+        ctx.lineWidth = isHinted ? 3.5 : 2.5;
+        ctx.strokeStyle = isHinted ? '#fde047' : color;
+        ctx.stroke();
+
+        // Center Target Dot
+        ctx.beginPath();
+        ctx.arc(toNode.x, toNode.y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+
+        // Highlight Vulnerable Opponent Bead Being Jumped Over
+        if (isJump && m.over !== undefined) {
+          const overNode = nodes[m.over];
+          ctx.beginPath();
+          ctx.arc(overNode.x, overNode.y, 24, 0, Math.PI * 2);
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 2.5;
+          ctx.setLineDash([4, 4]);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+        ctx.restore();
+      }
+    }
+
+    function drawBead(x, y, player, isSelected = false) {
+      const radius = 19;
+      ctx.save();
+
+      // Selection Halo
+      if (isSelected) {
+        const haloR = radius + 6 + Math.sin(pulseTick * 0.15) * 2.5;
+        ctx.beginPath();
+        ctx.arc(x, y, haloR, 0, Math.PI * 2);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      // Drop Shadow
+      ctx.beginPath();
+      ctx.arc(x + 1.5, y + 3, radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
+      ctx.fill();
+
+      // Bead Body
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+
+      if (player === 1) {
+        // Player 1: Sky Blue Glossy Disc
+        const grad = ctx.createRadialGradient(x - 5, y - 5, 3, x, y, radius);
+        grad.addColorStop(0, '#7dd3fc');
+        grad.addColorStop(0.55, '#0284c7');
+        grad.addColorStop(1, '#0c4a6e');
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.lineWidth = 2.2;
+        ctx.strokeStyle = '#e0f2fe';
+        ctx.stroke();
+
+        // Inner Ring Detail
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 0.52, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      } else {
+        // Player 2 / AI: Rose Crimson Glossy Disc
+        const grad = ctx.createRadialGradient(x - 5, y - 5, 3, x, y, radius);
+        grad.addColorStop(0, '#fda4af');
+        grad.addColorStop(0.55, '#e11d48');
+        grad.addColorStop(1, '#881337');
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.lineWidth = 2.2;
+        ctx.strokeStyle = '#ffe4e6';
+        ctx.stroke();
+
+        // Inner Ring Detail
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 0.52, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function renderLoop() {
+      pulseTick++;
+      ctx.clearRect(0, 0, SIZE, SIZE);
+
+      drawBoard();
+      drawLegalMoveGuides();
+
+      // Draw All Stationary Beads
+      for (const node of nodes) {
+        if (node.occupant !== null) {
+          drawBead(node.x, node.y, node.occupant, node.id === selectedNodeId);
+        }
+      }
+
+      // Draw Moving Bead Animation on Top
+      if (movingBeadAnim) {
+        drawBead(movingBeadAnim.x, movingBeadAnim.y, movingBeadAnim.player, true);
+      }
+
+      // Update & Draw Capture Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.94;
+        p.vy *= 0.94;
+        p.alpha -= 0.028;
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+        } else {
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // Update & Draw Floating Popups
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.y += ft.dy;
+        ft.alpha -= 0.022;
+        if (ft.alpha <= 0) {
+          floatingTexts.splice(i, 1);
+        } else {
+          ctx.save();
+          ctx.globalAlpha = ft.alpha;
+          ctx.font = '800 20px Inter, sans-serif';
+          ctx.fillStyle = ft.color;
+          ctx.textAlign = 'center';
+          ctx.shadowColor = 'rgba(0,0,0,0.8)';
+          ctx.shadowBlur = 8;
+          ctx.fillText(ft.text, ft.x, ft.y);
+          ctx.restore();
+        }
+      }
+
+      requestAnimationFrame(renderLoop);
+    }
+
+    window.onload = function () {
+      startNewMatch();
+      document.getElementById('mainMenu').classList.remove('hidden');
+      document.getElementById('mainMenu').classList.add('flex');
+      requestAnimationFrame(renderLoop);
+    };
+  </script>
+</body>
+</html>
