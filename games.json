@@ -1,0 +1,14 @@
+{
+  "categories": {
+    "1": "Board games",
+    "2": "Strategy",
+    "3": "Table sports"
+  },
+  "games": [
+    { "name": "Ludo & Snakes", "description": "Classic Ludo and Snakes & Ladders in one board game suite.", "category": 1, "order": 1, "folder": "ludo", "image": "", "visibility": "public" },
+    { "name": "Bead 16", "description": "Sholo Guti: a traditional strategy game with chain captures.", "category": 2, "order": 1, "folder": "bead-16", "image": "", "visibility": "public" },
+    { "name": "Tic Tac Toe", "description": "Line up three marks first. Play a friend or the computer.", "category": 2, "order": 2, "folder": "tic-tac-toe", "image": "", "visibility": "public" },
+    { "name": "Carrom Pool", "description": "Flick the striker and pocket coins, with the red queen worth 50.", "category": 3, "order": 1, "folder": "carrom", "image": "", "visibility": "public" },
+    { "name": "8-Ball Pool", "description": "Pocket your solids or stripes, then sink the 8-ball last.", "category": 3, "order": 2, "folder": "8-ball-pool", "image": "", "visibility": "public" }
+  ]
+}
