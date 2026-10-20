@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Tic-Tac-Toe — Minimal 2D Offline Board Game</title>
+  <meta name="description" content="Play Tic-Tac-Toe offline! Features Classic 3x3, Infinity Bolt (disappearing marks), and 4x4 Grid modes with Unbeatable Minimax AI and 2-player pass-and-play." />
+  <meta name="keywords" content="Tic Tac Toe, Tik Tak Toe, offline 2D board game, minimalist tic tac toe, HTML5 game" />
+  <meta property="og:title" content="Tic-Tac-Toe — Minimal 2D Offline Board Game" />
+  <meta property="og:description" content="Smooth 2D Tic-Tac-Toe with Classic, Infinity No-Draw, and 4x4 modes, local multiplayer, and smart offline AI." />
+  <meta property="og:type" content="website" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0f1115;
+      font-family: 'Inter', sans-serif;
+      color: #f3f4f6;
+      touch-action: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-modal {
+      animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-between h-full w-full relative">
+
+  <!-- ==================== MAIN MENU OVERLAY ==================== -->
+  <div id="mainMenu" class="fixed inset-0 z-40 flex items-center justify-center bg-[#0f1115] p-4 overflow-y-auto">
+    <div class="w-full max-w-md bg-[#181b22] border border-white/10 rounded-3xl p-5 sm:p-6 shadow-2xl flex flex-col gap-4 animate-modal my-auto">
+      
+      <!-- Top Bar: Badge & Audio Toggle -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Offline 2D Strategy
+        </div>
+        <button id="menuSoundBtn" onclick="toggleSound()" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Toggle Sound">
+          <svg id="menuSoundIconOn" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
+          <svg id="menuSoundIconOff" class="w-5 h-5 hidden text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mini Board Logo & Title -->
+      <div class="text-center flex flex-col items-center gap-1.5">
+        <div class="w-16 h-16 rounded-2xl bg-[#111827] border-4 border-[#3a2618] shadow-inner grid grid-cols-2 gap-1.5 p-2.5 relative">
+          <!-- Mini X -->
+          <div class="flex items-center justify-center text-sky-400 font-black text-base leading-none">✕</div>
+          <!-- Mini O -->
+          <div class="flex items-center justify-center text-rose-500 font-black text-base leading-none">◯</div>
+          <!-- Mini O -->
+          <div class="flex items-center justify-center text-rose-500 font-black text-base leading-none">◯</div>
+          <!-- Mini X -->
+          <div class="flex items-center justify-center text-sky-400 font-black text-base leading-none">✕</div>
+        </div>
+        <h1 class="text-3xl font-extrabold tracking-tight text-white mt-1">
+          TIC TAC <span class="text-amber-500">TOE</span>
+        </h1>
+        <p id="variantRuleDesc" class="text-xs text-gray-400">Classic 3×3 Grid &bull; First to align 3 marks wins</p>
+      </div>
+
+      <!-- Game Variant Selector -->
+      <div class="flex flex-col gap-1.5">
+        <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400 px-1">Game Variant</span>
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="selectVariant('classic')" id="varClassic" class="p-2.5 rounded-2xl border-2 border-amber-500 bg-amber-500/15 flex flex-col items-center gap-0.5 transition">
+            <span class="text-xs font-extrabold text-white">Classic 3×3</span>
+            <span class="text-[10px] text-gray-400">Standard Rules</span>
+          </button>
+          <button onclick="selectVariant('infinity')" id="varInfinity" class="p-2.5 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-0.5 transition">
+            <span class="text-xs font-extrabold text-white">Infinity 3×3</span>
+            <span class="text-[10px] text-amber-400">Max 3 Marks!</span>
+          </button>
+          <button onclick="selectVariant('grid4')" id="varGrid4" class="p-2.5 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-0.5 transition">
+            <span class="text-xs font-extrabold text-white">Mega 4×4</span>
+            <span class="text-[10px] text-gray-400">4-in-a-Row</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode Selection -->
+      <div class="grid grid-cols-2 gap-3">
+        <button id="modeFriendBtn" onclick="selectMode('friend')" class="p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 flex flex-col items-center gap-1 transition">
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span class="text-sm font-bold text-white">Play with Friend</span>
+          <span class="text-[11px] text-gray-400">2P Pass &amp; Play</span>
+        </button>
+
+        <button id="modeAiBtn" onclick="selectMode('ai')" class="p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1 transition">
+          <svg class="w-5 h-5 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span class="text-sm font-bold text-white">vs Computer</span>
+          <span class="text-[11px] text-gray-400">Smart Offline AI</span>
+        </button>
+      </div>
+
+      <!-- AI Difficulty Selector (Shown when vs Computer is selected) -->
+      <div id="aiDifficultyRow" class="hidden flex-col gap-2 bg-white/5 p-3 rounded-2xl border border-white/10">
+        <div class="flex items-center justify-between text-xs text-gray-400 font-semibold px-1">
+          <span>AI DIFFICULTY</span>
+          <span id="aiDiffLabel" class="text-sky-400">Pro (Unbeatable)</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="selectDifficulty('easy')" id="diffEasy" class="py-1.5 rounded-xl text-xs font-bold border border-white/10 bg-white/5 text-gray-300 transition">Easy</button>
+          <button onclick="selectDifficulty('medium')" id="diffMedium" class="py-1.5 rounded-xl text-xs font-bold border border-white/10 bg-white/5 text-gray-300 transition">Medium</button>
+          <button onclick="selectDifficulty('pro')" id="diffPro" class="py-1.5 rounded-xl text-xs font-bold border border-sky-500 bg-sky-500/20 text-white transition">Pro</button>
+        </div>
+      </div>
+
+      <!-- Series Target & Theme Selector -->
+      <div class="flex items-center justify-between bg-white/5 px-4 py-2.5 rounded-2xl border border-white/10">
+        <div class="flex flex-col">
+          <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Board Theme</span>
+          <span id="themeNameLabel" class="text-xs text-gray-200 font-medium mt-0.5">Classic Birch</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <button onclick="selectTheme('birch')" id="themeBtn_birch" class="w-7 h-7 rounded-full bg-[#ecdcc2] border-2 border-white ring-2 ring-amber-500 transition transform scale-110" title="Classic Birch"></button>
+          <button onclick="selectTheme('slate')" id="themeBtn_slate" class="w-7 h-7 rounded-full bg-[#1e293b] border-2 border-slate-400 transition opacity-70 hover:opacity-100" title="Midnight Slate"></button>
+          <button onclick="selectTheme('emerald')" id="themeBtn_emerald" class="w-7 h-7 rounded-full bg-[#14532d] border-2 border-emerald-400 transition opacity-70 hover:opacity-100" title="Tournament Emerald"></button>
+          <button onclick="selectTheme('ocean')" id="themeBtn_ocean" class="w-7 h-7 rounded-full bg-[#164e63] border-2 border-cyan-400 transition opacity-70 hover:opacity-100" title="Ocean Minimal"></button>
+        </div>
+      </div>
+
+      <!-- Start Game CTA -->
+      <button onclick="startNewSeries()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 active:scale-[0.99] text-white font-extrabold text-base tracking-wide shadow-lg shadow-orange-600/25 transition">
+        START MATCH
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ==================== GAMEPLAY HUD & BOARD ==================== -->
+  <div id="gameContainer" class="w-full h-full max-w-xl mx-auto flex flex-col justify-between p-3 sm:p-4 select-none">
+    
+    <!-- Top HUD Bar -->
+    <div class="w-full flex items-center justify-between gap-2 bg-[#181b22] border border-white/10 rounded-2xl p-2.5 shadow-lg">
+      
+      <!-- Player 1 (X) Score Card -->
+      <div id="p1Card" class="flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-sky-500 bg-sky-500/10 transition-all">
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            <span id="p1TurnDot" class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-sky-300">Player 1 (✕)</span>
+          </div>
+          <span id="p1Score" class="text-2xl font-extrabold text-white leading-tight">0</span>
+        </div>
+        <div class="text-right text-[10px] text-gray-400 font-medium leading-tight">
+          <div>Mark</div>
+          <div class="text-sky-400 font-black text-sm mt-0.5">✕</div>
+        </div>
+      </div>
+
+      <!-- Center Status Pill & Controls -->
+      <div class="flex flex-col items-center justify-center px-2 min-w-[120px] text-center">
+        <span id="statusBanner" class="text-xs font-bold text-amber-400 tracking-wide truncate max-w-[135px]">Player 1's Turn</span>
+        <span id="drawCountText" class="text-[10px] text-gray-400 font-semibold mt-0.5">Draws: 0</span>
+        <div class="flex items-center gap-1.5 mt-1.5">
+          <button onclick="cycleVariantInGame()" class="px-2 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-[10px] font-bold text-amber-400 transition" title="Switch Game Variant">
+            <span id="hudVariantBadge">3×3</span>
+          </button>
+          <button onclick="cycleThemeInGame()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Change Board Theme">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+          </button>
+          <button onclick="toggleSound()" id="hudSoundBtn" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Mute / Unmute">
+            <svg id="hudSoundOn" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>
+            <svg id="hudSoundOff" class="w-3.5 h-3.5 hidden text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+            </svg>
+          </button>
+          <button onclick="openMainMenu()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Main Menu">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Player 2 / AI (O) Score Card -->
+      <div id="p2Card" class="flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-white/10 bg-white/5 opacity-75 transition-all">
+        <div class="text-left text-[10px] text-gray-400 font-medium leading-tight">
+          <div>Mark</div>
+          <div class="text-rose-400 font-black text-sm mt-0.5">◯</div>
+        </div>
+        <div class="flex flex-col items-end">
+          <div class="flex items-center gap-1.5">
+            <span id="p2Name" class="text-[11px] font-bold uppercase tracking-wider text-rose-300">Player 2 (◯)</span>
+            <span id="p2TurnDot" class="w-2 h-2 rounded-full bg-rose-400 animate-ping hidden"></span>
+          </div>
+          <span id="p2Score" class="text-2xl font-extrabold text-white leading-tight">0</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Active Mode Info Strip -->
+    <div id="modeInfoStrip" class="flex items-center justify-center gap-3 text-xs text-gray-400 py-1">
+      <span>Mode: <strong id="stripVariantName" class="text-white">Classic 3×3</strong></span>
+      <span>&bull;</span>
+      <span id="stripRuleHint">Align 3 marks horizontally, vertically, or diagonally</span>
+    </div>
+
+    <!-- Center Board Wrapper -->
+    <div id="boardWrapper" class="flex-1 w-full flex items-center justify-center overflow-hidden my-1">
+      <div class="relative aspect-square max-h-full max-w-full flex items-center justify-center shadow-2xl rounded-3xl">
+        <canvas id="tttCanvas" width="700" height="700" class="w-full h-full rounded-3xl touch-none cursor-pointer"></canvas>
+      </div>
+    </div>
+
+    <!-- Bottom Action & Status Control Bar -->
+    <div class="w-full bg-[#181b22] border border-white/10 rounded-2xl px-4 py-3 shadow-lg flex items-center justify-between gap-3">
+      <div class="flex flex-col min-w-0">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">Match Control</span>
+        <span id="bottomHintText" class="text-xs text-sky-400 font-medium truncate mt-0.5">Tap any empty square on the board to place your mark</span>
+      </div>
+
+      <div class="flex items-center gap-2 shrink-0">
+        <button onclick="useSmartHint()" id="hintBtn" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-amber-400 transition flex items-center gap-1.5" title="Highlight Best Move">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg>
+          <span>Hint</span>
+        </button>
+        <button onclick="resetRound()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-xs font-extrabold text-white shadow-md shadow-sky-600/20 transition">
+          New Round
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== ROUND / MATCH OVER MODAL ==================== -->
+  <div id="gameOverModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="w-full max-w-sm bg-[#181b22] border border-white/15 rounded-3xl p-6 text-center shadow-2xl flex flex-col gap-5 animate-modal">
+      <div class="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 mx-auto flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+      </div>
+
+      <div>
+        <p id="modalBadgeText" class="text-xs font-bold uppercase tracking-widest text-amber-400">Round Complete</p>
+        <h2 id="winnerTitle" class="text-2xl font-extrabold text-white mt-1">Player 1 Wins!</h2>
+        <p id="winnerSubtitle" class="text-xs text-gray-400 mt-1">3 marks aligned in a row</p>
+      </div>
+
+      <!-- Scoreboard Summary -->
+      <div class="grid grid-cols-3 gap-2 bg-white/5 p-3.5 rounded-2xl border border-white/10">
+        <div class="flex flex-col items-center border-r border-white/10 pr-1">
+          <span class="text-[11px] text-sky-400 font-bold uppercase">Player 1 (✕)</span>
+          <span id="finalP1Score" class="text-2xl font-extrabold text-white mt-1">0</span>
+        </div>
+        <div class="flex flex-col items-center border-r border-white/10 px-1">
+          <span class="text-[11px] text-gray-400 font-bold uppercase">Draws</span>
+          <span id="finalDraws" class="text-2xl font-extrabold text-gray-300 mt-1">0</span>
+        </div>
+        <div class="flex flex-col items-center pl-1">
+          <span id="finalP2Name" class="text-[11px] text-rose-400 font-bold uppercase">Player 2 (◯)</span>
+          <span id="finalP2Score" class="text-2xl font-extrabold text-white mt-1">0</span>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button onclick="openMainMenu()" class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-bold text-sm transition">
+          Main Menu
+        </button>
+        <button onclick="nextRoundFromModal()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold text-sm shadow-lg shadow-orange-600/25 transition">
+          Next Round
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== GAME SCRIPT ==================== -->
+  <script>
+    /**************************************************************
+     * 1. SOUND SYNTHESIZER (Web Audio API - 100% Offline)
+     **************************************************************/
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('menuSoundIconOn').classList.toggle('hidden', !soundEnabled);
+      document.getElementById('menuSoundIconOff').classList.toggle('hidden', soundEnabled);
+      document.getElementById('hudSoundOn').classList.toggle('hidden', !soundEnabled);
+      document.getElementById('hudSoundOff').classList.toggle('hidden', soundEnabled);
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+
+      if (type === 'placeX') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(360, now);
+        osc.frequency.exponentialRampToValueAtTime(580, now + 0.085);
+        gain.gain.setValueAtTime(0.26, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.095);
+      } else if (type === 'placeO') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(480, now);
+        osc.frequency.exponentialRampToValueAtTime(290, now + 0.095);
+        gain.gain.setValueAtTime(0.26, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.105);
+      } else if (type === 'vanish') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(240, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.14);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      } else if (type === 'hint') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(660, now);
+        osc.frequency.exponentialRampToValueAtTime(880, now + 0.12);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.14);
+      } else if (type === 'draw') {
+        [320, 260].forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.11);
+          gain.gain.setValueAtTime(0.22, now + idx * 0.11);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.11 + 0.22);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.11);
+          osc.stop(now + idx * 0.11 + 0.23);
+        });
+      } else if (type === 'win') {
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.085);
+          gain.gain.setValueAtTime(0.25, now + idx * 0.085);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.085 + 0.34);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.085);
+          osc.stop(now + idx * 0.085 + 0.35);
+        });
+      }
+    }
+
+    /**************************************************************
+     * 2. BOARD THEMES & CONFIGURATION
+     **************************************************************/
+    const THEMES = {
+      birch: {
+        name: 'Classic Birch',
+        frameOuter: '#2b1b12',
+        frameInner: '#472e1f',
+        surface: '#ebd9c0',
+        surfaceVignette: '#dec6a4',
+        gridColor: '#5c3a21',
+        cellHover: 'rgba(92, 58, 33, 0.09)',
+        xColor: '#0284c7',
+        oColor: '#e11d48',
+        winLine: '#f59e0b'
+      },
+      slate: {
+        name: 'Midnight Slate',
+        frameOuter: '#090d16',
+        frameInner: '#1e293b',
+        surface: '#111827',
+        surfaceVignette: '#0b0f19',
+        gridColor: '#334155',
+        cellHover: 'rgba(255, 255, 255, 0.04)',
+        xColor: '#38bdf8',
+        oColor: '#fb7185',
+        winLine: '#fbbf24'
+      },
+      emerald: {
+        name: 'Tournament Emerald',
+        frameOuter: '#14261c',
+        frameInner: '#1e3a2b',
+        surface: '#134e32',
+        surfaceVignette: '#0d3b24',
+        gridColor: '#2d6a4f',
+        cellHover: 'rgba(255, 255, 255, 0.05)',
+        xColor: '#fcd34d',
+        oColor: '#fb7185',
+        winLine: '#34d399'
+      },
+      ocean: {
+        name: 'Ocean Minimal',
+        frameOuter: '#0c1926',
+        frameInner: '#152c42',
+        surface: '#164e63',
+        surfaceVignette: '#0e3a4c',
+        gridColor: '#0284c7',
+        cellHover: 'rgba(255, 255, 255, 0.05)',
+        xColor: '#38bdf8',
+        oColor: '#f43f5e',
+        winLine: '#fde047'
+      }
+    };
+
+    const THEME_KEYS = Object.keys(THEMES);
+    let currentThemeKey = 'birch';
+
+    // Game settings
+    let gameVariant = 'classic'; // 'classic' | 'infinity' | 'grid4'
+    let gameMode = 'friend';     // 'friend' | 'ai'
+    let aiDifficulty = 'pro';    // 'easy' | 'medium' | 'pro'
+
+    /**************************************************************
+     * 3. GAME STATE & GEOMETRY
+     **************************************************************/
+    const SIZE = 700;
+    const CENTER = SIZE / 2;
+    const FRAME_WIDTH = 44;
+    const PLAY_MIN = FRAME_WIDTH;
+    const PLAY_MAX = SIZE - FRAME_WIDTH;
+    const PLAY_SIZE = PLAY_MAX - PLAY_MIN; // 612
+
+    const canvas = document.getElementById('tttCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let gridSize = 3; // 3 for classic/infinity, 4 for grid4
+    let board = [];   // Array of 'X' | 'O' | null
+    let cellAnim = []; // Animation progress (0..1) for each cell
+    let moveQueues = { X: [], O: [] }; // Used in Infinity 3x3 mode to track oldest mark
+
+    let currentPlayer = 'X'; // 'X' = Player 1, 'O' = Player 2 / AI
+    let roundStarter = 'X';  // Alternates each round for fairness
+    let gameState = 'PLAYING'; // 'PLAYING' | 'AI_THINKING' | 'ROUND_OVER'
+    let scores = { X: 0, O: 0, draws: 0 };
+
+    let hoverCell = -1;
+    let hintCell = -1;
+    let winningCombo = null;
+    let winLineProgress = 0;
+    let pulseTick = 0;
+    let particles = [];
+    let floatingTexts = [];
+    let aiTimer = null;
+    let modalTimer = null;
+
+    /**************************************************************
+     * 4. MENU & UI HANDLERS
+     **************************************************************/
+    function selectVariant(variant) {
+      gameVariant = variant;
+      const desc = document.getElementById('variantRuleDesc');
+      const map = {
+        classic: {
+          btn: 'varClassic',
+          text: 'Classic 3×3 Grid • First to align 3 marks wins'
+        },
+        infinity: {
+          btn: 'varInfinity',
+          text: 'Infinity 3×3 (No Draws!) • Max 3 marks per player; placing a 4th removes your oldest'
+        },
+        grid4: {
+          btn: 'varGrid4',
+          text: 'Mega 4×4 Grid • Align 4 marks in a row, column, or diagonal to win'
+        }
+      };
+
+      ['classic', 'infinity', 'grid4'].forEach(v => {
+        const el = document.getElementById(map[v].btn);
+        if (v === variant) {
+          el.className = 'p-2.5 rounded-2xl border-2 border-amber-500 bg-amber-500/15 flex flex-col items-center gap-0.5 transition';
+        } else {
+          el.className = 'p-2.5 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-0.5 transition';
+        }
+      });
+      desc.textContent = map[variant].text;
+    }
+
+    function selectMode(mode) {
+      gameMode = mode;
+      const friendBtn = document.getElementById('modeFriendBtn');
+      const aiBtn = document.getElementById('modeAiBtn');
+      const aiRow = document.getElementById('aiDifficultyRow');
+
+      if (mode === 'friend') {
+        friendBtn.className = 'p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 flex flex-col items-center gap-1 transition';
+        aiBtn.className = 'p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1 transition';
+        aiRow.classList.add('hidden');
+        aiRow.classList.remove('flex');
+      } else {
+        aiBtn.className = 'p-3 rounded-2xl border-2 border-sky-500 bg-sky-500/10 flex flex-col items-center gap-1 transition';
+        friendBtn.className = 'p-3 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1 transition';
+        aiRow.classList.remove('hidden');
+        aiRow.classList.add('flex');
+      }
+    }
+
+    function selectDifficulty(diff) {
+      aiDifficulty = diff;
+      const labels = { easy: 'Easy', medium: 'Medium', pro: 'Pro (Unbeatable)' };
+      document.getElementById('aiDiffLabel').textContent = labels[diff];
+
+      ['easy', 'medium', 'pro'].forEach(d => {
+        const btn = document.getElementById('diff' + d.charAt(0).toUpperCase() + d.slice(1));
+        if (d === diff) {
+          btn.className = 'py-1.5 rounded-xl text-xs font-bold border border-sky-500 bg-sky-500/20 text-white transition';
+        } else {
+          btn.className = 'py-1.5 rounded-xl text-xs font-bold border border-white/10 bg-white/5 text-gray-300 transition';
+        }
+      });
+    }
+
+    function selectTheme(themeKey) {
+      currentThemeKey = themeKey;
+      document.getElementById('themeNameLabel').textContent = THEMES[themeKey].name;
+      THEME_KEYS.forEach(k => {
+        const btn = document.getElementById('themeBtn_' + k);
+        if (k === themeKey) {
+          btn.classList.add('ring-2', 'ring-amber-500', 'scale-110', 'border-white');
+          btn.classList.remove('opacity-70');
+        } else {
+          btn.classList.remove('ring-2', 'ring-amber-500', 'scale-110', 'border-white');
+          btn.classList.add('opacity-70');
+        }
+      });
+    }
+
+    function cycleThemeInGame() {
+      const idx = THEME_KEYS.indexOf(currentThemeKey);
+      selectTheme(THEME_KEYS[(idx + 1) % THEME_KEYS.length]);
+    }
+
+    function cycleVariantInGame() {
+      const order = ['classic', 'infinity', 'grid4'];
+      const next = order[(order.indexOf(gameVariant) + 1) % order.length];
+      selectVariant(next);
+      startNewSeries();
+    }
+
+    function openMainMenu() {
+      if (aiTimer) clearTimeout(aiTimer);
+      if (modalTimer) clearTimeout(modalTimer);
+      document.getElementById('gameOverModal').classList.add('hidden');
+      document.getElementById('gameOverModal').classList.remove('flex');
+      document.getElementById('mainMenu').classList.remove('hidden');
+      document.getElementById('mainMenu').classList.add('flex');
+    }
+
+    /**************************************************************
+     * 5. SERIES & ROUND INITIALIZATION
+     **************************************************************/
+    function startNewSeries() {
+      getAudioCtx();
+      document.getElementById('mainMenu').classList.add('hidden');
+      document.getElementById('mainMenu').classList.remove('flex');
+      document.getElementById('gameOverModal').classList.add('hidden');
+      document.getElementById('gameOverModal').classList.remove('flex');
+
+      scores = { X: 0, O: 0, draws: 0 };
+      roundStarter = 'X';
+
+      const p2Label = gameMode === 'ai' ? 'Computer (◯)' : 'Player 2 (◯)';
+      document.getElementById('p2Name').textContent = p2Label;
+      document.getElementById('finalP2Name').textContent = p2Label;
+
+      updateVariantBanner();
+      resetRound(true);
+    }
+
+    function updateVariantBanner() {
+      const badge = document.getElementById('hudVariantBadge');
+      const stripName = document.getElementById('stripVariantName');
+      const stripHint = document.getElementById('stripRuleHint');
+
+      if (gameVariant === 'classic') {
+        badge.textContent = '3×3';
+        stripName.textContent = 'Classic 3×3';
+        stripHint.textContent = 'Align 3 marks in any row, column, or diagonal';
+      } else if (gameVariant === 'infinity') {
+        badge.textContent = 'INF';
+        stripName.textContent = 'Infinity 3×3';
+        stripHint.textContent = 'Max 3 marks each — placing a 4th vanishes your oldest mark!';
+      } else {
+        badge.textContent = '4×4';
+        stripName.textContent = 'Mega 4×4';
+        stripHint.textContent = 'Align 4 marks in any row, column, or diagonal';
+      }
+    }
+
+    function resetRound(keepStarter = false) {
+      if (aiTimer) clearTimeout(aiTimer);
+      if (modalTimer) clearTimeout(modalTimer);
+
+      document.getElementById('gameOverModal').classList.add('hidden');
+      document.getElementById('gameOverModal').classList.remove('flex');
+
+      gridSize = gameVariant === 'grid4' ? 4 : 3;
+      const totalCells = gridSize * gridSize;
+      board = Array(totalCells).fill(null);
+      cellAnim = Array(totalCells).fill(0);
+      moveQueues = { X: [], O: [] };
+
+      if (!keepStarter) {
+        roundStarter = roundStarter === 'X' ? 'O' : 'X';
+      }
+      currentPlayer = roundStarter;
+      winningCombo = null;
+      winLineProgress = 0;
+      hoverCell = -1;
+      hintCell = -1;
+      particles = [];
+      floatingTexts = [];
+
+      prepareTurn();
+    }
+
+    function nextRoundFromModal() {
+      resetRound(false);
+    }
+
+    function prepareTurn() {
+      hintCell = -1;
+      if (gameMode === 'ai' && currentPlayer === 'O') {
+        gameState = 'AI_THINKING';
+        updateHUD("Computer's Turn");
+        document.getElementById('bottomHintText').textContent = 'Computer is analyzing the board...';
+        document.getElementById('hintBtn').disabled = true;
+        aiTimer = setTimeout(executeAIMove, 460);
+      } else {
+        gameState = 'PLAYING';
+        const turnName = currentPlayer === 'X' ? "Player 1's Turn (✕)" : "Player 2's Turn (◯)";
+        updateHUD(turnName);
+        document.getElementById('bottomHintText').textContent = gameVariant === 'infinity' && moveQueues[currentPlayer].length >= 3
+          ? 'Your pulsing mark will vanish when you place your next mark!'
+          : 'Tap any empty square on the board to place your mark';
+        document.getElementById('hintBtn').disabled = false;
+      }
+    }
+
+    function updateHUD(statusText) {
+      document.getElementById('p1Score').textContent = scores.X;
+      document.getElementById('p2Score').textContent = scores.O;
+      document.getElementById('drawCountText').textContent = `Draws: ${scores.draws}`;
+      document.getElementById('statusBanner').textContent = statusText;
+
+      const p1Card = document.getElementById('p1Card');
+      const p2Card = document.getElementById('p2Card');
+      const p1Dot = document.getElementById('p1TurnDot');
+      const p2Dot = document.getElementById('p2TurnDot');
+
+      if (currentPlayer === 'X') {
+        p1Card.className = 'flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-sky-500 bg-sky-500/10 transition-all';
+        p2Card.className = 'flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-white/10 bg-white/5 opacity-70 transition-all';
+        p1Dot.classList.remove('hidden');
+        p2Dot.classList.add('hidden');
+      } else {
+        p2Card.className = 'flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-rose-500 bg-rose-500/10 transition-all';
+        p1Card.className = 'flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-white/10 bg-white/5 opacity-70 transition-all';
+        p2Dot.classList.remove('hidden');
+        p1Dot.classList.add('hidden');
+      }
+    }
+
+    /**************************************************************
+     * 6. WINNING LINES & GAME LOGIC
+     **************************************************************/
+    function getWinPatterns(size) {
+      const patterns = [];
+      // Rows & Columns
+      for (let i = 0; i < size; i++) {
+        const row = [];
+        const col = [];
+        for (let j = 0; j < size; j++) {
+          row.push(i * size + j);
+          col.push(j * size + i);
+        }
+        patterns.push(row, col);
+      }
+      // Diagonals
+      const diag1 = [];
+      const diag2 = [];
+      for (let i = 0; i < size; i++) {
+        diag1.push(i * size + i);
+        diag2.push(i * size + (size - 1 - i));
+      }
+      patterns.push(diag1, diag2);
+      return patterns;
+    }
+
+    function checkWinner(boardState, size = gridSize) {
+      const patterns = getWinPatterns(size);
+      for (const pat of patterns) {
+        const first = boardState[pat[0]];
+        if (first && pat.every(idx => boardState[idx] === first)) {
+          return { winner: first, combo: pat };
+        }
+      }
+      if (boardState.every(cell => cell !== null)) {
+        return { winner: 'DRAW', combo: null };
+      }
+      return null;
+    }
+
+    function makeMove(cellIdx) {
+      if (gameState !== 'PLAYING' && gameState !== 'AI_THINKING') return;
+      if (board[cellIdx] !== null) return;
+
+      hintCell = -1;
+
+      // Infinity 3x3 Mode: Each player only keeps 3 marks on the board
+      if (gameVariant === 'infinity') {
+        const q = moveQueues[currentPlayer];
+        if (q.length >= 3) {
+          const oldestIdx = q.shift();
+          board[oldestIdx] = null;
+          cellAnim[oldestIdx] = 0;
+          const oldPt = getCellCenter(oldestIdx);
+          spawnFloatingText('VANISHED', oldPt.x, oldPt.y, '#94a3b8');
+          playSound('vanish');
+        }
+        q.push(cellIdx);
+      }
+
+      board[cellIdx] = currentPlayer;
+      cellAnim[cellIdx] = 0.01;
+      playSound(currentPlayer === 'X' ? 'placeX' : 'placeO');
+
+      const pt = getCellCenter(cellIdx);
+      const theme = THEMES[currentThemeKey];
+      spawnParticles(pt.x, pt.y, currentPlayer === 'X' ? theme.xColor : theme.oColor, 10);
+
+      // Evaluate Win or Draw
+      const result = checkWinner(board, gridSize);
+      if (result) {
+        handleRoundEnd(result);
+        return;
+      }
+
+      // Switch Turn
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      prepareTurn();
+    }
+
+    function handleRoundEnd(result) {
+      gameState = 'ROUND_OVER';
+      document.getElementById('hintBtn').disabled = true;
+
+      if (result.winner === 'DRAW') {
+        scores.draws++;
+        playSound('draw');
+        updateHUD("It's a Draw!");
+        document.getElementById('bottomHintText').textContent = 'Board full — Round ended in a draw';
+        spawnFloatingText('DRAW ROUND', CENTER, CENTER, '#fbbf24');
+      } else {
+        scores[result.winner]++;
+        winningCombo = result.combo;
+        winLineProgress = 0.01;
+        playSound('win');
+
+        const winName = result.winner === 'X'
+          ? 'Player 1 (✕)'
+          : (gameMode === 'ai' ? 'Computer (◯)' : 'Player 2 (◯)');
+
+        updateHUD(`${winName} Wins!`);
+        document.getElementById('bottomHintText').textContent = `${winName} connected ${gridSize} in a row!`;
+
+        // Confetti burst along winning line
+        result.combo.forEach(idx => {
+          const c = getCellCenter(idx);
+          spawnParticles(c.x, c.y, THEMES[currentThemeKey].winLine, 18);
+        });
+        spawnFloatingText(`${winName} WINS!`, CENTER, CENTER, '#fbbf24');
+      }
+
+      modalTimer = setTimeout(() => {
+        showGameOverModal(result.winner);
+      }, 1150);
+    }
+
+    function showGameOverModal(winner) {
+      const p2Label = gameMode === 'ai' ? 'Computer' : 'Player 2';
+      let title = "It's a Draw!";
+      let sub = 'Neither player connected a full line';
+
+      if (winner === 'X') {
+        title = 'Player 1 Wins!';
+        sub = `Connected ${gridSize} ✕ marks in a row`;
+      } else if (winner === 'O') {
+        title = `${p2Label} Wins!`;
+        sub = `Connected ${gridSize} ◯ marks in a row`;
+      }
+
+      document.getElementById('winnerTitle').textContent = title;
+      document.getElementById('winnerSubtitle').textContent = sub;
+      document.getElementById('finalP1Score').textContent = scores.X;
+      document.getElementById('finalDraws').textContent = scores.draws;
+      document.getElementById('finalP2Score').textContent = scores.O;
+
+      const modal = document.getElementById('gameOverModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    /**************************************************************
+     * 7. SMART OFFLINE AI (MINIMAX + INFINITY + 4x4 HEURISTICS)
+     **************************************************************/
+    function executeAIMove() {
+      if (gameState !== 'AI_THINKING') return;
+      const move = computeBestMove('O', aiDifficulty);
+      if (move !== -1) {
+        makeMove(move);
+      }
+    }
+
+    function useSmartHint() {
+      if (gameState !== 'PLAYING') return;
+      getAudioCtx();
+      const bestCell = computeBestMove(currentPlayer, 'pro');
+      if (bestCell !== -1) {
+        hintCell = bestCell;
+        playSound('hint');
+        const pt = getCellCenter(bestCell);
+        spawnFloatingText('BEST MOVE', pt.x, pt.y - 24, '#fbbf24');
+      }
+    }
+
+    function computeBestMove(player, difficulty) {
+      const emptyCells = [];
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] === null) emptyCells.push(i);
+      }
+      if (emptyCells.length === 0) return -1;
+
+      // Easy: 65% random move, 35% smart move
+      if (difficulty === 'easy' && Math.random() < 0.65) {
+        return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      }
+      // Medium: 30% random move, 70% smart move
+      if (difficulty === 'medium' && Math.random() < 0.30) {
+        return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      }
+
+      const opponent = player === 'X' ? 'O' : 'X';
+
+      // 1. Check immediate winning move (accounting for Infinity disappearance!)
+      for (const idx of emptyCells) {
+        const sim = simulatePlacement(board, moveQueues, player, idx);
+        const res = checkWinner(sim.board, gridSize);
+        if (res && res.winner === player) return idx;
+      }
+
+      // 2. Check immediate block of opponent's winning move
+      for (const idx of emptyCells) {
+        const sim = simulatePlacement(board, moveQueues, opponent, idx);
+        const res = checkWinner(sim.board, gridSize);
+        if (res && res.winner === opponent) return idx;
+      }
+
+      // 3. Full Depth-Limited Minimax with Alpha-Beta Pruning
+      const maxDepth = gridSize === 3 ? (gameVariant === 'infinity' ? 6 : 9) : 5;
+      let bestScore = -Infinity;
+      let bestMoves = [emptyCells[0]];
+
+      for (const idx of emptyCells) {
+        const sim = simulatePlacement(board, moveQueues, player, idx);
+        const score = minimax(sim.board, sim.queues, 1, false, player, opponent, -Infinity, Infinity, maxDepth);
+        if (score > bestScore) {
+          bestScore = score;
+          bestMoves = [idx];
+        } else if (score === bestScore) {
+          bestMoves.push(idx);
+        }
+      }
+
+      return bestMoves[Math.floor(Math.random() * bestMoves.length)];
+    }
+
+    function simulatePlacement(curBoard, curQueues, mark, idx) {
+      const nextBoard = [...curBoard];
+      const nextQueues = {
+        X: [...curQueues.X],
+        O: [...curQueues.O]
+      };
+
+      if (gameVariant === 'infinity') {
+        if (nextQueues[mark].length >= 3) {
+          const vanishIdx = nextQueues[mark].shift();
+          nextBoard[vanishIdx] = null;
+        }
+        nextQueues[mark].push(idx);
+      }
+
+      nextBoard[idx] = mark;
+      return { board: nextBoard, queues: nextQueues };
+    }
+
+    function minimax(simBoard, simQueues, depth, isMaximizing, aiMark, humanMark, alpha, beta, maxDepth) {
+      const result = checkWinner(simBoard, gridSize);
+      if (result) {
+        if (result.winner === aiMark) return 100 - depth;
+        if (result.winner === humanMark) return depth - 100;
+        return 0;
+      }
+      if (depth >= maxDepth) {
+        return evaluateHeuristic(simBoard, aiMark, humanMark);
+      }
+
+      const empty = [];
+      for (let i = 0; i < simBoard.length; i++) {
+        if (simBoard[i] === null) empty.push(i);
+      }
+
+      if (isMaximizing) {
+        let maxEval = -Infinity;
+        for (const idx of empty) {
+          const next = simulatePlacement(simBoard, simQueues, aiMark, idx);
+          const ev = minimax(next.board, next.queues, depth + 1, false, aiMark, humanMark, alpha, beta, maxDepth);
+          maxEval = Math.max(maxEval, ev);
+          alpha = Math.max(alpha, ev);
+          if (beta <= alpha) break;
+        }
+        return maxEval;
+      } else {
+        let minEval = Infinity;
+        for (const idx of empty) {
+          const next = simulatePlacement(simBoard, simQueues, humanMark, idx);
+          const ev = minimax(next.board, next.queues, depth + 1, true, aiMark, humanMark, alpha, beta, maxDepth);
+          minEval = Math.min(minEval, ev);
+          beta = Math.min(beta, ev);
+          if (beta <= alpha) break;
+        }
+        return minEval;
+      }
+    }
+
+    function evaluateHeuristic(simBoard, aiMark, humanMark) {
+      let score = 0;
+      const patterns = getWinPatterns(gridSize);
+      for (const pat of patterns) {
+        let aiCount = 0;
+        let huCount = 0;
+        for (const idx of pat) {
+          if (simBoard[idx] === aiMark) aiCount++;
+          else if (simBoard[idx] === humanMark) huCount++;
+        }
+        if (aiCount > 0 && huCount === 0) score += Math.pow(3, aiCount);
+        else if (huCount > 0 && aiCount === 0) score -= Math.pow(3, huCount);
+      }
+      return score;
+    }
+
+    /**************************************************************
+     * 8. CANVAS POINTER INPUT
+     **************************************************************/
+    function getCanvasCoords(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (SIZE / rect.width),
+        y: (clientY - rect.top) * (SIZE / rect.height)
+      };
+    }
+
+    function getCellIndexFromCoords(x, y) {
+      if (x < PLAY_MIN || x > PLAY_MAX || y < PLAY_MIN || y > PLAY_MAX) return -1;
+      const cellSize = PLAY_SIZE / gridSize;
+      const col = Math.floor((x - PLAY_MIN) / cellSize);
+      const row = Math.floor((y - PLAY_MIN) / cellSize);
+      if (col < 0 || col >= gridSize || row < 0 || row >= gridSize) return -1;
+      return row * gridSize + col;
+    }
+
+    function getCellCenter(idx) {
+      const cellSize = PLAY_SIZE / gridSize;
+      const row = Math.floor(idx / gridSize);
+      const col = idx % gridSize;
+      return {
+        x: PLAY_MIN + (col + 0.5) * cellSize,
+        y: PLAY_MIN + (row + 0.5) * cellSize
+      };
+    }
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (gameState !== 'PLAYING') {
+        hoverCell = -1;
+        return;
+      }
+      const pt = getCanvasCoords(e);
+      hoverCell = getCellIndexFromCoords(pt.x, pt.y);
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      hoverCell = -1;
+    });
+
+    canvas.addEventListener('pointerdown', (e) => {
+      if (gameState !== 'PLAYING') return;
+      getAudioCtx();
+      const pt = getCanvasCoords(e);
+      const idx = getCellIndexFromCoords(pt.x, pt.y);
+      if (idx !== -1 && board[idx] === null) {
+        makeMove(idx);
+      }
+    });
+
+    /**************************************************************
+     * 9. RENDERING ENGINE (2D Canvas Board, Marks, Effects)
+     **************************************************************/
+    function spawnParticles(x, y, color, count = 12) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 1.5 + Math.random() * 4.5;
+        particles.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          radius: 2.5 + Math.random() * 3,
+          color,
+          alpha: 1
+        });
+      }
+    }
+
+    function spawnFloatingText(text, x, y, color) {
+      floatingTexts.push({ text, x, y, color, alpha: 1, dy: -1.1 });
+    }
+
+    function drawBoard() {
+      const theme = THEMES[currentThemeKey];
+      const cellSize = PLAY_SIZE / gridSize;
+
+      // 1. Outer Wooden / Slate Frame
+      ctx.fillStyle = theme.frameOuter;
+      ctx.fillRect(0, 0, SIZE, SIZE);
+
+      // Inner Frame Bevel
+      ctx.fillStyle = theme.frameInner;
+      ctx.beginPath();
+      ctx.roundRect(10, 10, SIZE - 20, SIZE - 20, 26);
+      ctx.fill();
+
+      // 2. Playing Surface with Radial Gradient
+      const grad = ctx.createRadialGradient(CENTER, CENTER, 40, CENTER, CENTER, SIZE * 0.65);
+      grad.addColorStop(0, theme.surface);
+      grad.addColorStop(1, theme.surfaceVignette);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect(PLAY_MIN, PLAY_MIN, PLAY_SIZE, PLAY_SIZE, 20);
+      ctx.fill();
+
+      // 3. Hover & Smart Hint Highlights
+      if (gameState === 'PLAYING' && hoverCell !== -1 && board[hoverCell] === null) {
+        const r = Math.floor(hoverCell / gridSize);
+        const c = hoverCell % gridSize;
+        ctx.fillStyle = theme.cellHover;
+        ctx.beginPath();
+        ctx.roundRect(
+          PLAY_MIN + c * cellSize + 10,
+          PLAY_MIN + r * cellSize + 10,
+          cellSize - 20,
+          cellSize - 20,
+          16
+        );
+        ctx.fill();
+
+        // Subtle Ghost Preview Mark
+        const pt = getCellCenter(hoverCell);
+        drawMark(pt.x, pt.y, currentPlayer, 1, 0.22, false);
+      }
+
+      if (hintCell !== -1 && board[hintCell] === null) {
+        const r = Math.floor(hintCell / gridSize);
+        const c = hintCell % gridSize;
+        ctx.save();
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([8, 6]);
+        ctx.beginPath();
+        ctx.roundRect(
+          PLAY_MIN + c * cellSize + 14,
+          PLAY_MIN + r * cellSize + 14,
+          cellSize - 28,
+          cellSize - 28,
+          16
+        );
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // 4. Crisp Grid Lines
+      ctx.save();
+      ctx.strokeStyle = theme.gridColor;
+      ctx.lineWidth = gridSize === 3 ? 7 : 5.5;
+      ctx.lineCap = 'round';
+      const pad = 26;
+
+      for (let i = 1; i < gridSize; i++) {
+        const pos = PLAY_MIN + i * cellSize;
+        // Vertical line
+        ctx.beginPath();
+        ctx.moveTo(pos, PLAY_MIN + pad);
+        ctx.lineTo(pos, PLAY_MAX - pad);
+        ctx.stroke();
+
+        // Horizontal line
+        ctx.beginPath();
+        ctx.moveTo(PLAY_MIN + pad, pos);
+        ctx.lineTo(PLAY_MAX - pad, pos);
+        ctx.stroke();
+      }
+
+      // Decorative Grid Intersection Dots
+      for (let r = 1; r < gridSize; r++) {
+        for (let c = 1; c < gridSize; c++) {
+          ctx.beginPath();
+          ctx.arc(PLAY_MIN + c * cellSize, PLAY_MIN + r * cellSize, 5.5, 0, Math.PI * 2);
+          ctx.fillStyle = theme.gridColor;
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+
+    function drawMark(cx, cy, mark, progress, alpha = 1, isFadingNext = false) {
+      const theme = THEMES[currentThemeKey];
+      const cellSize = PLAY_SIZE / gridSize;
+      const radius = cellSize * 0.27;
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      // In Infinity 3x3 mode, highlight the oldest mark that will vanish on this turn
+      if (isFadingNext) {
+        const pulseAlpha = 0.4 + Math.sin(pulseTick * 0.14) * 0.25;
+        ctx.globalAlpha = pulseAlpha;
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius + 16, 0, Math.PI * 2);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2.5;
+        ctx.setLineDash([6, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      ctx.lineCap = 'round';
+      ctx.lineWidth = gridSize === 3 ? 15 : 12;
+
+      if (mark === 'X') {
+        ctx.strokeStyle = theme.xColor;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.28)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 3;
+
+        // Stroke 1: Top-Left to Bottom-Right
+        const p1 = Math.min(1, progress * 2);
+        if (p1 > 0) {
+          ctx.beginPath();
+          ctx.moveTo(cx - radius, cy - radius);
+          ctx.lineTo(
+            cx - radius + (radius * 2) * p1,
+            cy - radius + (radius * 2) * p1
+          );
+          ctx.stroke();
+        }
+
+        // Stroke 2: Top-Right to Bottom-Left
+        const p2 = Math.max(0, (progress - 0.5) * 2);
+        if (p2 > 0) {
+          ctx.beginPath();
+          ctx.moveTo(cx + radius, cy - radius);
+          ctx.lineTo(
+            cx + radius - (radius * 2) * p2,
+            cy - radius + (radius * 2) * p2
+          );
+          ctx.stroke();
+        }
+      } else if (mark === 'O') {
+        ctx.strokeStyle = theme.oColor;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.28)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 3;
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawWinningStrike() {
+      if (!winningCombo) return;
+      const theme = THEMES[currentThemeKey];
+      const startPt = getCellCenter(winningCombo[0]);
+      const endPt = getCellCenter(winningCombo[winningCombo.length - 1]);
+
+      const curX = startPt.x + (endPt.x - startPt.x) * winLineProgress;
+      const curY = startPt.y + (endPt.y - startPt.y) * winLineProgress;
+
+      ctx.save();
+      ctx.strokeStyle = theme.winLine;
+      ctx.lineWidth = 14;
+      ctx.lineCap = 'round';
+      ctx.shadowColor = theme.winLine;
+      ctx.shadowBlur = 18;
+
+      ctx.beginPath();
+      ctx.moveTo(startPt.x, startPt.y);
+      ctx.lineTo(curX, curY);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function renderLoop() {
+      pulseTick++;
+      ctx.clearRect(0, 0, SIZE, SIZE);
+
+      drawBoard();
+
+      // Determine which cell is about to vanish in Infinity 3x3 mode
+      let fadingCellIdx = -1;
+      if (gameVariant === 'infinity' && (gameState === 'PLAYING' || gameState === 'AI_THINKING')) {
+        const q = moveQueues[currentPlayer];
+        if (q.length >= 3) {
+          fadingCellIdx = q[0];
+        }
+      }
+
+      // Draw all placed marks
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] !== null) {
+          if (cellAnim[i] < 1) {
+            cellAnim[i] = Math.min(1, cellAnim[i] + 0.11);
+          }
+          const pt = getCellCenter(i);
+          drawMark(pt.x, pt.y, board[i], cellAnim[i], 1, i === fadingCellIdx);
+        }
+      }
+
+      // Animate & draw winning strike line
+      if (winningCombo) {
+        if (winLineProgress < 1) {
+          winLineProgress = Math.min(1, winLineProgress + 0.08);
+        }
+        drawWinningStrike();
+      }
+
+      // Update & draw particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vx *= 0.95;
+        p.vy *= 0.95;
+        p.alpha -= 0.028;
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+        } else {
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      // Update & draw floating feedback texts
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.y += ft.dy;
+        ft.alpha -= 0.022;
+        if (ft.alpha <= 0) {
+          floatingTexts.splice(i, 1);
+        } else {
+          ctx.save();
+          ctx.globalAlpha = ft.alpha;
+          ctx.font = '800 22px Inter, sans-serif';
+          ctx.fillStyle = ft.color;
+          ctx.textAlign = 'center';
+          ctx.shadowColor = 'rgba(0,0,0,0.75)';
+          ctx.shadowBlur = 8;
+          ctx.fillText(ft.text, ft.x, ft.y);
+          ctx.restore();
+        }
+      }
+
+      requestAnimationFrame(renderLoop);
+    }
+
+    window.onload = function () {
+      startNewSeries();
+      document.getElementById('mainMenu').classList.remove('hidden');
+      document.getElementById('mainMenu').classList.add('flex');
+      requestAnimationFrame(renderLoop);
+    };
+  </script>
+</body>
+</html>
