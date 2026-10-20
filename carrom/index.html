@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Carrom Pool — Minimal 2D Offline Board Game</title>
+  <meta name="description" content="Play Carrom Pool offline! A clean, modern 2D Carrom board game with realistic disc physics, smart offline AI, and 2-player local pass-and-play multiplayer." />
+  <meta name="keywords" content="Carrom Pool game, offline 2D board game, minimalist carrom, browser-based multiplayer game, HTML5 carrom game" />
+  <meta property="og:title" content="Carrom Pool — Minimal 2D Offline Board Game" />
+  <meta property="og:description" content="Smooth 2D Carrom Pool with realistic physics, local multiplayer, and smart offline AI." />
+  <meta property="og:type" content="website" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0f1115;
+      font-family: 'Inter', sans-serif;
+      color: #f3f4f6;
+      touch-action: none;
+    }
+
+    /* Custom Range Slider for Striker Positioning */
+    input[type="range"].striker-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"].striker-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #38bdf8;
+      border: 3px solid #ffffff;
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.6);
+      cursor: grab;
+      transition: transform 0.12s ease, background-color 0.15s ease;
+    }
+    input[type="range"].striker-slider::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.15);
+      background: #0ea5e9;
+    }
+    input[type="range"].striker-slider::-moz-range-thumb {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #38bdf8;
+      border: 3px solid #ffffff;
+      box-shadow: 0 2px 10px rgba(56, 189, 248, 0.6);
+      cursor: grab;
+      transition: transform 0.12s ease;
+    }
+    input[type="range"].striker-slider:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* Subtle animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .animate-modal {
+      animation: fadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-between h-full w-full relative">
+
+  <!-- ==================== MAIN MENU OVERLAY ==================== -->
+  <div id="mainMenu" class="fixed inset-0 z-40 flex items-center justify-center bg-[#0f1115] p-4">
+    <div class="w-full max-w-md bg-[#181b22] border border-white/10 rounded-3xl p-6 sm:p-7 shadow-2xl flex flex-col gap-6 animate-modal">
+      
+      <!-- Top Bar: Badge & Audio Toggle -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xs font-semibold tracking-wider uppercase text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          Offline 2D Physics
+        </div>
+        <button id="menuSoundBtn" onclick="toggleSound()" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Toggle Sound">
+          <svg id="menuSoundIconOn" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
+          <svg id="menuSoundIconOff" class="w-5 h-5 hidden text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mini Board Logo & Title -->
+      <div class="text-center flex flex-col items-center gap-2">
+        <div class="w-16 h-16 rounded-2xl bg-[#e8d8c0] border-4 border-[#3a2618] shadow-inner flex items-center justify-center relative">
+          <div class="w-2.5 h-2.5 rounded-full bg-neutral-900 absolute top-1 left-1"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-neutral-900 absolute top-1 right-1"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-neutral-900 absolute bottom-1 left-1"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-neutral-900 absolute bottom-1 right-1"></div>
+          <div class="w-6 h-6 rounded-full border border-amber-700/60 flex items-center justify-center">
+            <div class="w-2.5 h-2.5 rounded-full bg-rose-600"></div>
+          </div>
+        </div>
+        <h1 class="text-3xl font-extrabold tracking-tight text-white mt-1">
+          CARROM <span class="text-amber-500">POOL</span>
+        </h1>
+        <p class="text-xs text-gray-400">White: 20 pts &bull; Black: 10 pts &bull; Red Queen: 50 pts</p>
+      </div>
+
+      <!-- Mode Selection -->
+      <div class="grid grid-cols-2 gap-3">
+        <button id="modeFriendBtn" onclick="selectMode('friend')" class="p-3.5 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 flex flex-col items-center gap-1.5 transition">
+          <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span class="text-sm font-bold text-white">Play with Friend</span>
+          <span class="text-[11px] text-gray-400">2P Pass &amp; Play</span>
+        </button>
+
+        <button id="modeAiBtn" onclick="selectMode('ai')" class="p-3.5 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1.5 transition">
+          <svg class="w-6 h-6 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span class="text-sm font-bold text-white">vs Computer</span>
+          <span class="text-[11px] text-gray-400">Smart Offline AI</span>
+        </button>
+      </div>
+
+      <!-- AI Difficulty Selector (Shown when vs Computer is selected) -->
+      <div id="aiDifficultyRow" class="hidden flex-col gap-2 bg-white/5 p-3 rounded-2xl border border-white/10">
+        <div class="flex items-center justify-between text-xs text-gray-400 font-semibold px-1">
+          <span>AI DIFFICULTY</span>
+          <span id="aiDiffLabel" class="text-sky-400">Medium</span>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <button onclick="selectDifficulty('easy')" id="diffEasy" class="py-1.5 rounded-xl text-xs font-bold border border-white/10 bg-white/5 text-gray-300 transition">Easy</button>
+          <button onclick="selectDifficulty('medium')" id="diffMedium" class="py-1.5 rounded-xl text-xs font-bold border border-sky-500 bg-sky-500/20 text-white transition">Medium</button>
+          <button onclick="selectDifficulty('pro')" id="diffPro" class="py-1.5 rounded-xl text-xs font-bold border border-white/10 bg-white/5 text-gray-300 transition">Pro</button>
+        </div>
+      </div>
+
+      <!-- Board Theme Selector -->
+      <div class="flex items-center justify-between bg-white/5 px-4 py-3 rounded-2xl border border-white/10">
+        <div class="flex flex-col">
+          <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Board Theme</span>
+          <span id="themeNameLabel" class="text-xs text-gray-200 font-medium mt-0.5">Classic Birch</span>
+        </div>
+        <div class="flex items-center gap-2.5">
+          <button onclick="selectTheme('birch')" id="themeBtn_birch" class="w-7 h-7 rounded-full bg-[#ecdcc2] border-2 border-white ring-2 ring-amber-500 transition transform scale-110" title="Classic Birch"></button>
+          <button onclick="selectTheme('slate')" id="themeBtn_slate" class="w-7 h-7 rounded-full bg-[#1e293b] border-2 border-slate-400 transition opacity-70 hover:opacity-100" title="Midnight Slate"></button>
+          <button onclick="selectTheme('emerald')" id="themeBtn_emerald" class="w-7 h-7 rounded-full bg-[#14532d] border-2 border-emerald-400 transition opacity-70 hover:opacity-100" title="Tournament Emerald"></button>
+          <button onclick="selectTheme('ocean')" id="themeBtn_ocean" class="w-7 h-7 rounded-full bg-[#164e63] border-2 border-cyan-400 transition opacity-70 hover:opacity-100" title="Ocean Minimal"></button>
+        </div>
+      </div>
+
+      <!-- Start Game CTA -->
+      <button onclick="startNewMatch()" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 active:scale-[0.99] text-white font-extrabold text-base tracking-wide shadow-lg shadow-orange-600/25 transition">
+        START MATCH
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ==================== GAMEPLAY HUD & BOARD ==================== -->
+  <div id="gameContainer" class="w-full h-full max-w-xl mx-auto flex flex-col justify-between p-3 sm:p-4 select-none">
+    
+    <!-- Top HUD Bar -->
+    <div class="w-full flex items-center justify-between gap-2 bg-[#181b22] border border-white/10 rounded-2xl p-2.5 shadow-lg">
+      
+      <!-- Player 1 Score Card -->
+      <div id="p1Card" class="flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-sky-500 bg-sky-500/10 transition-all">
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1.5">
+            <span id="p1TurnDot" class="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-sky-300">Player 1</span>
+          </div>
+          <span id="p1Score" class="text-2xl font-extrabold text-white leading-tight">0</span>
+        </div>
+        <div class="text-right text-[10px] text-gray-400 font-medium leading-tight">
+          <div>Bottom</div>
+          <div id="p1PocketCount" class="text-gray-300 font-semibold mt-0.5">0 pcs</div>
+        </div>
+      </div>
+
+      <!-- Center Status Pill & Controls -->
+      <div class="flex flex-col items-center justify-center px-2 min-w-[110px] text-center">
+        <span id="statusBanner" class="text-xs font-bold text-amber-400 tracking-wide truncate max-w-[125px]">Player 1's Turn</span>
+        <div class="flex items-center gap-1.5 mt-1.5">
+          <button onclick="cycleThemeInGame()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Change Board Theme">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+          </button>
+          <button onclick="toggleSound()" id="hudSoundBtn" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Mute / Unmute">
+            <svg id="hudSoundOn" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>
+            <svg id="hudSoundOff" class="w-3.5 h-3.5 hidden text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+            </svg>
+          </button>
+          <button onclick="openMainMenu()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-gray-300 transition" title="Main Menu">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Player 2 / AI Score Card -->
+      <div id="p2Card" class="flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-white/10 bg-white/5 opacity-75 transition-all">
+        <div class="text-left text-[10px] text-gray-400 font-medium leading-tight">
+          <div>Top</div>
+          <div id="p2PocketCount" class="text-gray-300 font-semibold mt-0.5">0 pcs</div>
+        </div>
+        <div class="flex flex-col items-end">
+          <div class="flex items-center gap-1.5">
+            <span id="p2Name" class="text-[11px] font-bold uppercase tracking-wider text-rose-300">Player 2</span>
+            <span id="p2TurnDot" class="w-2 h-2 rounded-full bg-rose-400 animate-ping hidden"></span>
+          </div>
+          <span id="p2Score" class="text-2xl font-extrabold text-white leading-tight">0</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Remaining Discs Mini Bar -->
+    <div class="flex items-center justify-center gap-4 text-xs text-gray-400 py-1">
+      <div class="flex items-center gap-1.5">
+        <span class="w-3 h-3 rounded-full bg-[#f8fafc] border border-gray-400 inline-block"></span>
+        <span>White (20): <strong id="remWhite" class="text-white">9</strong></span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-3 h-3 rounded-full bg-[#1e293b] border border-gray-500 inline-block"></span>
+        <span>Black (10): <strong id="remBlack" class="text-white">9</strong></span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-3 h-3 rounded-full bg-rose-600 border border-rose-300 inline-block"></span>
+        <span>Queen (50): <strong id="remQueen" class="text-white">1</strong></span>
+      </div>
+    </div>
+
+    <!-- Center Board Wrapper -->
+    <div id="boardWrapper" class="flex-1 w-full flex items-center justify-center overflow-hidden my-1">
+      <div class="relative aspect-square max-h-full max-w-full flex items-center justify-center shadow-2xl rounded-3xl">
+        <canvas id="carromCanvas" width="700" height="700" class="w-full h-full rounded-3xl touch-none"></canvas>
+      </div>
+    </div>
+
+    <!-- Bottom Striker Control Bar -->
+    <div class="w-full bg-[#181b22] border border-white/10 rounded-2xl px-4 py-3 shadow-lg flex flex-col gap-2">
+      <div class="flex items-center justify-between text-[11px] font-semibold tracking-wider uppercase text-gray-400">
+        <span>Position Striker</span>
+        <span id="aimHintText" class="text-sky-400 normal-case font-medium">Slide to position &bull; Pull striker to shoot</span>
+      </div>
+      <input
+        id="strikerSlider"
+        type="range"
+        min="0"
+        max="1000"
+        value="500"
+        class="striker-slider"
+      />
+    </div>
+
+  </div>
+
+  <!-- ==================== GAME OVER MODAL ==================== -->
+  <div id="gameOverModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-sm p-4">
+    <div class="w-full max-w-sm bg-[#181b22] border border-white/15 rounded-3xl p-6 text-center shadow-2xl flex flex-col gap-5 animate-modal">
+      <div class="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-400 mx-auto flex items-center justify-center">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+        </svg>
+      </div>
+
+      <div>
+        <p class="text-xs font-bold uppercase tracking-widest text-amber-400">Match Complete</p>
+        <h2 id="winnerTitle" class="text-2xl font-extrabold text-white mt-1">Player 1 Wins!</h2>
+        <p id="winnerSubtitle" class="text-xs text-gray-400 mt-1">All discs cleared from the board</p>
+      </div>
+
+      <!-- Final Score Comparison -->
+      <div class="grid grid-cols-2 gap-3 bg-white/5 p-3.5 rounded-2xl border border-white/10">
+        <div class="flex flex-col items-center border-r border-white/10 pr-2">
+          <span class="text-xs text-sky-400 font-bold uppercase">Player 1</span>
+          <span id="finalP1Score" class="text-3xl font-extrabold text-white mt-1">0</span>
+          <span class="text-[11px] text-gray-400">points</span>
+        </div>
+        <div class="flex flex-col items-center pl-2">
+          <span id="finalP2Name" class="text-xs text-rose-400 font-bold uppercase">Player 2</span>
+          <span id="finalP2Score" class="text-3xl font-extrabold text-white mt-1">0</span>
+          <span class="text-[11px] text-gray-400">points</span>
+        </div>
+      </div>
+
+      <div class="flex gap-3">
+        <button onclick="openMainMenu()" class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 font-bold text-sm transition">
+          Main Menu
+        </button>
+        <button onclick="startNewMatch()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold text-sm shadow-lg shadow-orange-600/25 transition">
+          Play Again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== GAME SCRIPT ==================== -->
+  <script>
+    /**************************************************************
+     * 1. SOUND SYNTHESIZER (Web Audio API - 100% Offline)
+     **************************************************************/
+    let soundEnabled = true;
+    let audioCtx = null;
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('menuSoundIconOn').classList.toggle('hidden', !soundEnabled);
+      document.getElementById('menuSoundIconOff').classList.toggle('hidden', soundEnabled);
+      document.getElementById('hudSoundOn').classList.toggle('hidden', !soundEnabled);
+      document.getElementById('hudSoundOff').classList.toggle('hidden', soundEnabled);
+    }
+
+    function playSound(type, intensity = 1) {
+      if (!soundEnabled) return;
+      const ctx = getAudioCtx();
+      if (!ctx) return;
+
+      const now = ctx.currentTime;
+      const vol = Math.min(1, Math.max(0.05, intensity));
+
+      if (type === 'hit') {
+        // Crisp wood clack when discs collide
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(340 + Math.random() * 80, now);
+        osc.frequency.exponentialRampToValueAtTime(95, now + 0.045);
+        gain.gain.setValueAtTime(vol * 0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      } else if (type === 'wall') {
+        // Deeper wooden thud on board cushion
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(55, now + 0.06);
+        gain.gain.setValueAtTime(vol * 0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.065);
+      } else if (type === 'shoot') {
+        // Striker flick release
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.exponentialRampToValueAtTime(480, now + 0.07);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.075);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === 'pocket') {
+        // Pleasant two-tone chime when a piece is pocketed
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(520, now);
+        osc.frequency.setValueAtTime(780, now + 0.07);
+        gain.gain.setValueAtTime(0.28, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.26);
+      } else if (type === 'foul') {
+        // Low buzzer for striker foul
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.linearRampToValueAtTime(110, now + 0.28);
+        gain.gain.setValueAtTime(0.22, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.31);
+      } else if (type === 'win') {
+        // Victory arpeggio
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.09);
+          gain.gain.setValueAtTime(0.25, now + idx * 0.09);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.09 + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.09);
+          osc.stop(now + idx * 0.09 + 0.36);
+        });
+      }
+    }
+
+    /**************************************************************
+     * 2. BOARD THEMES & CONFIGURATION
+     **************************************************************/
+    const THEMES = {
+      birch: {
+        name: 'Classic Birch',
+        frameOuter: '#2b1b12',
+        frameInner: '#472e1f',
+        surface: '#ebd9c0',
+        surfaceVignette: '#dec6a4',
+        lineColor: '#5c3a21',
+        accentRed: '#c83e37',
+        pocketColor: '#16120e',
+        pocketRim: '#855836'
+      },
+      slate: {
+        name: 'Midnight Slate',
+        frameOuter: '#090d16',
+        frameInner: '#1e293b',
+        surface: '#111827',
+        surfaceVignette: '#0b0f19',
+        lineColor: '#fbbf24',
+        accentRed: '#f43f5e',
+        pocketColor: '#030712',
+        pocketRim: '#334155'
+      },
+      emerald: {
+        name: 'Tournament Emerald',
+        frameOuter: '#14261c',
+        frameInner: '#1e3a2b',
+        surface: '#134e32',
+        surfaceVignette: '#0d3b24',
+        lineColor: '#f59e0b',
+        accentRed: '#ef4444',
+        pocketColor: '#061c11',
+        pocketRim: '#2d6a4f'
+      },
+      ocean: {
+        name: 'Ocean Minimal',
+        frameOuter: '#0c1926',
+        frameInner: '#152c42',
+        surface: '#164e63',
+        surfaceVignette: '#0e3a4c',
+        lineColor: '#38bdf8',
+        accentRed: '#fb7185',
+        pocketColor: '#08202b',
+        pocketRim: '#0284c7'
+      }
+    };
+
+    const THEME_KEYS = Object.keys(THEMES);
+    let currentThemeKey = 'birch';
+    let gameMode = 'friend'; // 'friend' | 'ai'
+    let aiDifficulty = 'medium'; // 'easy' | 'medium' | 'pro'
+
+    /**************************************************************
+     * 3. CONSTANTS & GEOMETRY (700x700 Logical Coordinate Space)
+     **************************************************************/
+    const SIZE = 700;
+    const CENTER = SIZE / 2;
+    const FRAME_WIDTH = 44;
+    const PLAY_MIN = FRAME_WIDTH;
+    const PLAY_MAX = SIZE - FRAME_WIDTH;
+
+    const POCKET_OFFSET = FRAME_WIDTH + 28;
+    const POCKET_RADIUS = 27;
+    const POCKETS = [
+      { x: POCKET_OFFSET, y: POCKET_OFFSET },
+      { x: SIZE - POCKET_OFFSET, y: POCKET_OFFSET },
+      { x: POCKET_OFFSET, y: SIZE - POCKET_OFFSET },
+      { x: SIZE - POCKET_OFFSET, y: SIZE - POCKET_OFFSET }
+    ];
+
+    // Baselines (Top for Player 2 / AI, Bottom for Player 1)
+    const BASELINE_Y_P1 = SIZE - FRAME_WIDTH - 74; // 582
+    const BASELINE_Y_P2 = FRAME_WIDTH + 74;        // 118
+    const BASELINE_X_MIN = FRAME_WIDTH + 105;      // 149
+    const BASELINE_X_MAX = SIZE - FRAME_WIDTH - 105; // 551
+    const BASELINE_CIRCLE_R = 15;
+
+    // Disc properties
+    const DISC_RADIUS = 14.5;
+    const STRIKER_RADIUS = 18.5;
+    const DISC_MASS = 1.0;
+    const STRIKER_MASS = 1.65;
+    const FRICTION = 0.986; // Smooth deceleration per frame
+    const SUB_STEPS = 8;    // Physics sub-steps per animation frame
+    const MAX_POWER = 27;   // Maximum launch velocity
+    const MAX_DRAG_DIST = 145;
+
+    /**************************************************************
+     * 4. GAME STATE (Persistent Pieces Across Turns!)
+     **************************************************************/
+    const canvas = document.getElementById('carromCanvas');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('strikerSlider');
+
+    // State Machine: 'AIMING' | 'MOVING' | 'AI_THINKING' | 'GAME_OVER'
+    let gameState = 'AIMING';
+    let currentPlayer = 1; // 1 = Bottom, 2 = Top (Friend or AI)
+    let scores = { 1: 0, 2: 0 };
+    let pocketedCount = { 1: 0, 2: 0 };
+
+    // Persistent array of pieces on the board (NEVER reset between turns)
+    let discs = [];
+    // Sinking animations for pocketed discs
+    let sinkingDiscs = [];
+    // Floating score popups
+    let floatingTexts = [];
+    // Turn tracking for the current shot
+    let pocketedThisTurn = [];
+
+    // Striker object
+    let striker = {
+      x: CENTER,
+      y: BASELINE_Y_P1,
+      vx: 0,
+      vy: 0,
+      radius: STRIKER_RADIUS,
+      mass: STRIKER_MASS,
+      active: true
+    };
+
+    // Aiming state
+    let isAiming = false;
+    let aimPullX = 0;
+    let aimPullY = 0;
+    let aiTimeoutId = null;
+
+    /**************************************************************
+     * 5. MENU & UI HANDLERS
+     **************************************************************/
+    function selectMode(mode) {
+      gameMode = mode;
+      const friendBtn = document.getElementById('modeFriendBtn');
+      const aiBtn = document.getElementById('modeAiBtn');
+      const aiRow = document.getElementById('aiDifficultyRow');
+
+      if (mode === 'friend') {
+        friendBtn.className = 'p-3.5 rounded-2xl border-2 border-emerald-500 bg-emerald-500/10 flex flex-col items-center gap-1.5 transition';
+        aiBtn.className = 'p-3.5 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1.5 transition';
+        aiRow.classList.add('hidden');
+        aiRow.classList.remove('flex');
+      } else {
+        aiBtn.className = 'p-3.5 rounded-2xl border-2 border-sky-500 bg-sky-500/10 flex flex-col items-center gap-1.5 transition';
+        friendBtn.className = 'p-3.5 rounded-2xl border-2 border-white/10 bg-white/5 hover:bg-white/10 flex flex-col items-center gap-1.5 transition';
+        aiRow.classList.remove('hidden');
+        aiRow.classList.add('flex');
+      }
+    }
+
+    function selectDifficulty(diff) {
+      aiDifficulty = diff;
+      const labels = { easy: 'Easy', medium: 'Medium', pro: 'Pro' };
+      document.getElementById('aiDiffLabel').textContent = labels[diff];
+
+      ['easy', 'medium', 'pro'].forEach(d => {
+        const btn = document.getElementById('diff' + d.charAt(0).toUpperCase() + d.slice(1));
+        if (d === diff) {
+          btn.className = 'py-1.5 rounded-xl text-xs font-bold border border-sky-500 bg-sky-500/20 text-white transition';
+        } else {
+          btn.className = 'py-1.5 rounded-xl text-xs font-bold border border-white/10 bg-white/5 text-gray-300 transition';
+        }
+      });
+    }
+
+    function selectTheme(themeKey) {
+      currentThemeKey = themeKey;
+      document.getElementById('themeNameLabel').textContent = THEMES[themeKey].name;
+      THEME_KEYS.forEach(k => {
+        const btn = document.getElementById('themeBtn_' + k);
+        if (k === themeKey) {
+          btn.classList.add('ring-2', 'ring-amber-500', 'scale-110', 'border-white');
+          btn.classList.remove('opacity-70');
+        } else {
+          btn.classList.remove('ring-2', 'ring-amber-500', 'scale-110', 'border-white');
+          btn.classList.add('opacity-70');
+        }
+      });
+    }
+
+    function cycleThemeInGame() {
+      const idx = THEME_KEYS.indexOf(currentThemeKey);
+      const nextKey = THEME_KEYS[(idx + 1) % THEME_KEYS.length];
+      selectTheme(nextKey);
+    }
+
+    function openMainMenu() {
+      if (aiTimeoutId) clearTimeout(aiTimeoutId);
+      document.getElementById('gameOverModal').classList.add('hidden');
+      document.getElementById('gameOverModal').classList.remove('flex');
+      document.getElementById('mainMenu').classList.remove('hidden');
+      document.getElementById('mainMenu').classList.add('flex');
+    }
+
+    /**************************************************************
+     * 6. INITIALIZE MATCH & RACK PIECES (ONLY AT MATCH START)
+     **************************************************************/
+    function startNewMatch() {
+      if (aiTimeoutId) clearTimeout(aiTimeoutId);
+      getAudioCtx(); // Unlock Web Audio on button click
+
+      document.getElementById('mainMenu').classList.add('hidden');
+      document.getElementById('mainMenu').classList.remove('flex');
+      document.getElementById('gameOverModal').classList.add('hidden');
+      document.getElementById('gameOverModal').classList.remove('flex');
+
+      scores = { 1: 0, 2: 0 };
+      pocketedCount = { 1: 0, 2: 0 };
+      currentPlayer = 1;
+      sinkingDiscs = [];
+      floatingTexts = [];
+      pocketedThisTurn = [];
+
+      document.getElementById('p2Name').textContent = gameMode === 'ai' ? 'Computer' : 'Player 2';
+      document.getElementById('finalP2Name').textContent = gameMode === 'ai' ? 'Computer' : 'Player 2';
+
+      setupInitialRack();
+      placeStrikerForTurn(true);
+      updateHUD('Player 1\'s Turn');
+    }
+
+    function setupInitialRack() {
+      discs = [];
+      const spacing = DISC_RADIUS * 2 + 1.2;
+
+      // 1. Red Queen in the exact center (50 pts)
+      discs.push({
+        id: 'queen',
+        type: 'queen',
+        points: 50,
+        x: CENTER,
+        y: CENTER,
+        vx: 0,
+        vy: 0,
+        radius: DISC_RADIUS,
+        mass: DISC_MASS
+      });
+
+      // 2. Inner Ring: 6 pieces alternating White (20 pts) and Black (10 pts)
+      for (let i = 0; i < 6; i++) {
+        const angle = (i * 60 - 30) * (Math.PI / 180);
+        const isWhite = i % 2 === 0;
+        discs.push({
+          id: `inner_${i}`,
+          type: isWhite ? 'white' : 'black',
+          points: isWhite ? 20 : 10,
+          x: CENTER + Math.cos(angle) * spacing,
+          y: CENTER + Math.sin(angle) * spacing,
+          vx: 0,
+          vy: 0,
+          radius: DISC_RADIUS,
+          mass: DISC_MASS
+        });
+      }
+
+      // 3. Outer Ring: 12 pieces (6 White, 6 Black) in standard Carrom geometry
+      for (let i = 0; i < 12; i++) {
+        const angle = (i * 30) * (Math.PI / 180);
+        const dist = (i % 2 === 0) ? spacing * Math.sqrt(3) : spacing * 2;
+        const isWhite = i % 2 === 0;
+        discs.push({
+          id: `outer_${i}`,
+          type: isWhite ? 'white' : 'black',
+          points: isWhite ? 20 : 10,
+          x: CENTER + Math.cos(angle) * dist,
+          y: CENTER + Math.sin(angle) * dist,
+          vx: 0,
+          vy: 0,
+          radius: DISC_RADIUS,
+          mass: DISC_MASS
+        });
+      }
+    }
+
+    /**************************************************************
+     * 7. STRIKER PLACEMENT & SLIDER LOGIC
+     **************************************************************/
+    function getSafeStrikerX(desiredX, yLine) {
+      let x = Math.max(BASELINE_X_MIN, Math.min(BASELINE_X_MAX, desiredX));
+      const minClearance = STRIKER_RADIUS + DISC_RADIUS + 3;
+
+      // Check if desiredX overlaps with any existing disc on the board
+      const isOverlapping = (testX) => {
+        for (const d of discs) {
+          const dx = testX - d.x;
+          const dy = yLine - d.y;
+          if (dx * dx + dy * dy < minClearance * minClearance) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      if (!isOverlapping(x)) return x;
+
+      // Search outward from desiredX for the nearest non-overlapping spot on the baseline
+      for (let offset = 4; offset <= (BASELINE_X_MAX - BASELINE_X_MIN); offset += 4) {
+        if (x + offset <= BASELINE_X_MAX && !isOverlapping(x + offset)) {
+          return x + offset;
+        }
+        if (x - offset >= BASELINE_X_MIN && !isOverlapping(x - offset)) {
+          return x - offset;
+        }
+      }
+      return x;
+    }
+
+    function placeStrikerForTurn(resetToCenter = false) {
+      isAiming = false;
+      striker.vx = 0;
+      striker.vy = 0;
+      striker.active = true;
+
+      const targetY = currentPlayer === 1 ? BASELINE_Y_P1 : BASELINE_Y_P2;
+      striker.y = targetY;
+
+      if (resetToCenter) {
+        slider.value = 500;
+      }
+
+      const ratio = parseFloat(slider.value) / 1000;
+      const rawX = BASELINE_X_MIN + ratio * (BASELINE_X_MAX - BASELINE_X_MIN);
+      striker.x = getSafeStrikerX(rawX, targetY);
+
+      // Sync slider thumb to actual safe X
+      const syncedRatio = (striker.x - BASELINE_X_MIN) / (BASELINE_X_MAX - BASELINE_X_MIN);
+      slider.value = Math.round(syncedRatio * 1000);
+
+      // Enable or disable slider depending on whether it's human or AI turn
+      if (gameMode === 'ai' && currentPlayer === 2) {
+        slider.disabled = true;
+        gameState = 'AI_THINKING';
+        document.getElementById('aimHintText').textContent = 'Computer is lining up a shot...';
+        aiTimeoutId = setTimeout(executeAIShot, 750);
+      } else {
+        slider.disabled = false;
+        gameState = 'AIMING';
+        const pLabel = currentPlayer === 1 ? 'Player 1' : 'Player 2';
+        document.getElementById('aimHintText').textContent = `${pLabel}: Slide to position • Pull striker to shoot`;
+      }
+    }
+
+    slider.addEventListener('input', () => {
+      if (gameState !== 'AIMING') return;
+      const ratio = parseFloat(slider.value) / 1000;
+      const desiredX = BASELINE_X_MIN + ratio * (BASELINE_X_MAX - BASELINE_X_MIN);
+      striker.x = getSafeStrikerX(desiredX, striker.y);
+    });
+
+    /**************************************************************
+     * 8. TOUCH & MOUSE AIMING CONTROLS
+     **************************************************************/
+    function getCanvasCoords(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (SIZE / rect.width),
+        y: (clientY - rect.top) * (SIZE / rect.height)
+      };
+    }
+
+    let draggingBaseline = false;
+
+    function handlePointerDown(e) {
+      if (gameState !== 'AIMING') return;
+      getAudioCtx();
+      const pt = getCanvasCoords(e);
+      const dx = pt.x - striker.x;
+      const dy = pt.y - striker.y;
+      const dist = Math.hypot(dx, dy);
+
+      // Allow grabbing the striker or clicking near it to aim
+      if (dist <= STRIKER_RADIUS * 3.2) {
+        isAiming = true;
+        aimPullX = striker.x;
+        aimPullY = striker.y;
+      } else if (Math.abs(pt.y - striker.y) <= 34 && pt.x >= BASELINE_X_MIN && pt.x <= BASELINE_X_MAX) {
+        // Clicking along the active baseline moves the striker horizontally
+        draggingBaseline = true;
+        striker.x = getSafeStrikerX(pt.x, striker.y);
+        const syncedRatio = (striker.x - BASELINE_X_MIN) / (BASELINE_X_MAX - BASELINE_X_MIN);
+        slider.value = Math.round(syncedRatio * 1000);
+      }
+    }
+
+    function handlePointerMove(e) {
+      if (gameState !== 'AIMING') return;
+      const pt = getCanvasCoords(e);
+
+      if (draggingBaseline) {
+        striker.x = getSafeStrikerX(pt.x, striker.y);
+        const syncedRatio = (striker.x - BASELINE_X_MIN) / (BASELINE_X_MAX - BASELINE_X_MIN);
+        slider.value = Math.round(syncedRatio * 1000);
+        return;
+      }
+
+      if (!isAiming) return;
+      aimPullX = pt.x;
+      aimPullY = pt.y;
+    }
+
+    function handlePointerUp() {
+      if (draggingBaseline) {
+        draggingBaseline = false;
+        return;
+      }
+      if (!isAiming || gameState !== 'AIMING') return;
+      isAiming = false;
+
+      // Slingshot vector (opposite of pull direction)
+      const pullDx = striker.x - aimPullX;
+      const pullDy = striker.y - aimPullY;
+      const pullDist = Math.hypot(pullDx, pullDy);
+
+      if (pullDist < 12) return; // Cancel shot if barely pulled
+
+      const clampedDist = Math.min(pullDist, MAX_DRAG_DIST);
+      const powerRatio = clampedDist / MAX_DRAG_DIST;
+      const speed = powerRatio * MAX_POWER;
+
+      striker.vx = (pullDx / pullDist) * speed;
+      striker.vy = (pullDy / pullDist) * speed;
+
+      pocketedThisTurn = [];
+      gameState = 'MOVING';
+      slider.disabled = true;
+      document.getElementById('aimHintText').textContent = 'Shot in motion...';
+      updateHUD('Shot in motion...');
+      playSound('shoot', powerRatio);
+    }
+
+    canvas.addEventListener('mousedown', handlePointerDown);
+    window.addEventListener('mousemove', handlePointerMove);
+    window.addEventListener('mouseup', handlePointerUp);
+
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handlePointerDown(e); }, { passive: false });
+    window.addEventListener('touchmove', (e) => { if (isAiming || draggingBaseline) e.preventDefault(); handlePointerMove(e); }, { passive: false });
+    window.addEventListener('touchend', handlePointerUp);
+
+    /**************************************************************
+     * 9. SMART OFFLINE AI ENGINE (Easy / Medium / Pro)
+     **************************************************************/
+    function executeAIShot() {
+      if (gameState !== 'AI_THINKING') return;
+
+      let bestPlan = null;
+      let bestScore = -Infinity;
+
+      // Evaluate candidate striker positions along Top baseline
+      const sampleSteps = 15;
+      for (let s = 0; s <= sampleSteps; s++) {
+        const rawX = BASELINE_X_MIN + (s / sampleSteps) * (BASELINE_X_MAX - BASELINE_X_MIN);
+        const sx = getSafeStrikerX(rawX, BASELINE_Y_P2);
+        const sy = BASELINE_Y_P2;
+
+        // Evaluate direct pot shots for every disc toward each of the 4 pockets
+        for (const d of discs) {
+          for (const p of POCKETS) {
+            const toPocketX = p.x - d.x;
+            const toPocketY = p.y - d.y;
+            const distToPocket = Math.hypot(toPocketX, toPocketY);
+            const dirX = toPocketX / distToPocket;
+            const dirY = toPocketY / distToPocket;
+
+            // Ghost ball impact position where striker must touch the disc
+            const ghostX = d.x - dirX * (STRIKER_RADIUS + DISC_RADIUS);
+            const ghostY = d.y - dirY * (STRIKER_RADIUS + DISC_RADIUS);
+
+            const shotDx = ghostX - sx;
+            const shotDy = ghostY - sy;
+            const shotDist = Math.hypot(shotDx, shotDy);
+            const shotDirX = shotDx / shotDist;
+            const shotDirY = shotDy / shotDist;
+
+            // Alignment dot product between striker->ghost and disc->pocket
+            const alignment = shotDirX * dirX + shotDirY * dirY;
+            if (alignment < 0.32) continue; // Cut angle too extreme
+
+            // Check if path from striker to ghost or disc to pocket is obstructed
+            let obstructed = false;
+            for (const other of discs) {
+              if (other === d) continue;
+              if (pointToSegmentDistance(other.x, other.y, sx, sy, ghostX, ghostY) < STRIKER_RADIUS + DISC_RADIUS - 2) {
+                obstructed = true;
+                break;
+              }
+              if (pointToSegmentDistance(other.x, other.y, d.x, d.y, p.x, p.y) < DISC_RADIUS * 2 - 2) {
+                obstructed = true;
+                break;
+              }
+            }
+
+            let score = d.points * 2.2 + alignment * 45 - (distToPocket + shotDist) * 0.08;
+            if (obstructed) score -= 75;
+            if (shotDy > 0) score += 12; // Prefer downward forward shots from top baseline
+
+            if (score > bestScore) {
+              bestScore = score;
+              const idealSpeed = Math.min(MAX_POWER * 0.88, Math.max(13, (shotDist + distToPocket) * 0.036));
+              bestPlan = { sx, dirX: shotDirX, dirY: shotDirY, speed: idealSpeed };
+            }
+          }
+        }
+      }
+
+      // Fallback if pack is tightly clustered
+      if (!bestPlan && discs.length > 0) {
+        const target = discs[0];
+        const sx = getSafeStrikerX(CENTER + (Math.random() - 0.5) * 90, BASELINE_Y_P2);
+        const dx = target.x - sx;
+        const dy = target.y - BASELINE_Y_P2;
+        const dist = Math.hypot(dx, dy);
+        bestPlan = { sx, dirX: dx / dist, dirY: dy / dist, speed: MAX_POWER * 0.78 };
+      }
+
+      // Apply difficulty jitter
+      const jitterMap = { easy: 0.14, medium: 0.055, pro: 0.012 };
+      const angleJitter = (Math.random() - 0.5) * (jitterMap[aiDifficulty] || 0.05);
+      const baseAngle = Math.atan2(bestPlan.dirY, bestPlan.dirX) + angleJitter;
+
+      striker.x = bestPlan.sx;
+      const syncedRatio = (striker.x - BASELINE_X_MIN) / (BASELINE_X_MAX - BASELINE_X_MIN);
+      slider.value = Math.round(syncedRatio * 1000);
+
+      striker.vx = Math.cos(baseAngle) * bestPlan.speed;
+      striker.vy = Math.sin(baseAngle) * bestPlan.speed;
+
+      pocketedThisTurn = [];
+      gameState = 'MOVING';
+      updateHUD('Computer shot...');
+      playSound('shoot', bestPlan.speed / MAX_POWER);
+    }
+
+    function pointToSegmentDistance(px, py, x1, y1, x2, y2) {
+      const A = px - x1;
+      const B = py - y1;
+      const C = x2 - x1;
+      const D = y2 - y1;
+      const dot = A * C + B * D;
+      const lenSq = C * C + D * D;
+      let param = -1;
+      if (lenSq !== 0) param = dot / lenSq;
+      let xx, yy;
+      if (param < 0) { xx = x1; yy = y1; }
+      else if (param > 1) { xx = x2; yy = y2; }
+      else { xx = x1 + param * C; yy = y1 + param * D; }
+      return Math.hypot(px - xx, py - yy);
+    }
+
+    /**************************************************************
+     * 10. SUB-STEPPED 2D PHYSICS ENGINE
+     **************************************************************/
+    function updatePhysics() {
+      if (gameState !== 'MOVING') return;
+
+      const allBodies = striker.active ? [striker, ...discs] : [...discs];
+
+      for (let step = 0; step < SUB_STEPS; step++) {
+        // 1. Advance positions
+        for (const b of allBodies) {
+          b.x += b.vx / SUB_STEPS;
+          b.y += b.vy / SUB_STEPS;
+
+          // Wall restitution collisions
+          const minBound = PLAY_MIN + b.radius;
+          const maxBound = PLAY_MAX - b.radius;
+
+          if (b.x < minBound) {
+            b.x = minBound;
+            b.vx = Math.abs(b.vx) * 0.82;
+            if (step === 0 && Math.hypot(b.vx, b.vy) > 1.2) playSound('wall', Math.hypot(b.vx, b.vy) / 15);
+          } else if (b.x > maxBound) {
+            b.x = maxBound;
+            b.vx = -Math.abs(b.vx) * 0.82;
+            if (step === 0 && Math.hypot(b.vx, b.vy) > 1.2) playSound('wall', Math.hypot(b.vx, b.vy) / 15);
+          }
+
+          if (b.y < minBound) {
+            b.y = minBound;
+            b.vy = Math.abs(b.vy) * 0.82;
+            if (step === 0 && Math.hypot(b.vx, b.vy) > 1.2) playSound('wall', Math.hypot(b.vx, b.vy) / 15);
+          } else if (b.y > maxBound) {
+            b.y = maxBound;
+            b.vy = -Math.abs(b.vy) * 0.82;
+            if (step === 0 && Math.hypot(b.vx, b.vy) > 1.2) playSound('wall', Math.hypot(b.vx, b.vy) / 15);
+          }
+        }
+
+        // 2. Elastic Circle-to-Circle Collisions
+        for (let i = 0; i < allBodies.length; i++) {
+          for (let j = i + 1; j < allBodies.length; j++) {
+            const b1 = allBodies[i];
+            const b2 = allBodies[j];
+            const dx = b2.x - b1.x;
+            const dy = b2.y - b1.y;
+            const dist = Math.hypot(dx, dy);
+            const minDist = b1.radius + b2.radius;
+
+            if (dist > 0 && dist < minDist) {
+              // Separate overlapping circles
+              const overlap = minDist - dist;
+              const nx = dx / dist;
+              const ny = dy / dist;
+              const totalMass = b1.mass + b2.mass;
+
+              b1.x -= nx * overlap * (b2.mass / totalMass);
+              b1.y -= ny * overlap * (b2.mass / totalMass);
+              b2.x += nx * overlap * (b1.mass / totalMass);
+              b2.y += ny * overlap * (b1.mass / totalMass);
+
+              // Relative velocity along normal
+              const rvx = b2.vx - b1.vx;
+              const rvy = b2.vy - b1.vy;
+              const velAlongNormal = rvx * nx + rvy * ny;
+
+              if (velAlongNormal < 0) {
+                const restitution = 0.92;
+                const impulse = -(1 + restitution) * velAlongNormal / (1 / b1.mass + 1 / b2.mass);
+                b1.vx -= (impulse / b1.mass) * nx;
+                b1.vy -= (impulse / b1.mass) * ny;
+                b2.vx += (impulse / b2.mass) * nx;
+                b2.vy += (impulse / b2.mass) * ny;
+
+                const hitStrength = Math.abs(velAlongNormal) / 14;
+                if (hitStrength > 0.06) playSound('hit', hitStrength);
+              }
+            }
+          }
+        }
+
+        // 3. Check Pocket Detection
+        // Check if Striker fell into a pocket (Foul)
+        if (striker.active) {
+          for (const p of POCKETS) {
+            if (Math.hypot(striker.x - p.x, striker.y - p.y) < POCKET_RADIUS - 3) {
+              striker.active = false;
+              striker.vx = 0;
+              striker.vy = 0;
+              pocketedThisTurn.push({ type: 'striker', points: -10 });
+              sinkingDiscs.push({ x: p.x, y: p.y, type: 'striker', radius: STRIKER_RADIUS, alpha: 1 });
+              playSound('foul');
+              break;
+            }
+          }
+        }
+
+        // Check if any Carrom disc fell into a pocket
+        for (let k = discs.length - 1; k >= 0; k--) {
+          const d = discs[k];
+          for (const p of POCKETS) {
+            if (Math.hypot(d.x - p.x, d.y - p.y) < POCKET_RADIUS - 2) {
+              discs.splice(k, 1);
+              pocketedThisTurn.push(d);
+              sinkingDiscs.push({ x: p.x, y: p.y, type: d.type, radius: d.radius, alpha: 1 });
+              playSound('pocket');
+              break;
+            }
+          }
+        }
+      }
+
+      // 4. Apply Friction & Stop Threshold once per frame
+      let anyMoving = false;
+      const currentBodies = striker.active ? [striker, ...discs] : [...discs];
+      for (const b of currentBodies) {
+        b.vx *= FRICTION;
+        b.vy *= FRICTION;
+        if (Math.hypot(b.vx, b.vy) < 0.055) {
+          b.vx = 0;
+          b.vy = 0;
+        } else {
+          anyMoving = true;
+        }
+      }
+
+      // 5. When all pieces have completely stopped, evaluate the turn!
+      if (!anyMoving) {
+        evaluateTurnEnd();
+      }
+    }
+
+    /**************************************************************
+     * 11. TURN EVALUATION & WIN/LOSE LOGIC
+     **************************************************************/
+    function evaluateTurnEnd() {
+      const foulCommitted = pocketedThisTurn.some(item => item.type === 'striker');
+      const validDiscs = pocketedThisTurn.filter(item => item.type !== 'striker');
+
+      let turnPoints = 0;
+      for (const d of validDiscs) {
+        turnPoints += d.points;
+        pocketedCount[currentPlayer]++;
+      }
+
+      if (foulCommitted) {
+        // Striker pocketed: -10 pts penalty & turn passes
+        scores[currentPlayer] = Math.max(0, scores[currentPlayer] + turnPoints - 10);
+        spawnFloatingText('FOUL! -10 pts', CENTER, CENTER, '#f43f5e');
+      } else if (turnPoints > 0) {
+        scores[currentPlayer] += turnPoints;
+        spawnFloatingText(`+${turnPoints} pts!`, CENTER, CENTER, '#34d399');
+      }
+
+      // Check if all discs on the board have been pocketed (Game Over!)
+      if (discs.length === 0) {
+        triggerGameOver();
+        return;
+      }
+
+      // Turn retention logic:
+      // Keep turn if player pocketed at least 1 valid disc AND did NOT commit a striker foul
+      const keepTurn = validDiscs.length > 0 && !foulCommitted;
+
+      if (!keepTurn) {
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
+      }
+
+      const nextPlayerLabel = currentPlayer === 1
+        ? 'Player 1\'s Turn'
+        : (gameMode === 'ai' ? 'Computer\'s Turn' : 'Player 2\'s Turn');
+
+      const statusMsg = foulCommitted
+        ? `Foul! ${nextPlayerLabel}`
+        : (keepTurn ? `Bonus Shot! +${turnPoints} pts` : nextPlayerLabel);
+
+      // Place striker on active player's baseline while keeping all board discs in place
+      placeStrikerForTurn(false);
+      updateHUD(statusMsg);
+    }
+
+    function updateHUD(statusText) {
+      document.getElementById('p1Score').textContent = scores[1];
+      document.getElementById('p2Score').textContent = scores[2];
+      document.getElementById('p1PocketCount').textContent = `${pocketedCount[1]} pcs`;
+      document.getElementById('p2PocketCount').textContent = `${pocketedCount[2]} pcs`;
+      document.getElementById('statusBanner').textContent = statusText;
+
+      // Update remaining piece counts
+      const whiteCount = discs.filter(d => d.type === 'white').length;
+      const blackCount = discs.filter(d => d.type === 'black').length;
+      const queenCount = discs.filter(d => d.type === 'queen').length;
+      document.getElementById('remWhite').textContent = whiteCount;
+      document.getElementById('remBlack').textContent = blackCount;
+      document.getElementById('remQueen').textContent = queenCount;
+
+      // Highlight active player card
+      const p1Card = document.getElementById('p1Card');
+      const p2Card = document.getElementById('p2Card');
+      const p1Dot = document.getElementById('p1TurnDot');
+      const p2Dot = document.getElementById('p2TurnDot');
+
+      if (currentPlayer === 1) {
+        p1Card.className = 'flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-sky-500 bg-sky-500/10 transition-all';
+        p2Card.className = 'flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-white/10 bg-white/5 opacity-70 transition-all';
+        p1Dot.classList.remove('hidden');
+        p2Dot.classList.add('hidden');
+      } else {
+        p2Card.className = 'flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-rose-500 bg-rose-500/10 transition-all';
+        p1Card.className = 'flex-1 flex items-center justify-between px-3 py-2 rounded-xl border-2 border-white/10 bg-white/5 opacity-70 transition-all';
+        p2Dot.classList.remove('hidden');
+        p1Dot.classList.add('hidden');
+      }
+    }
+
+    function triggerGameOver() {
+      gameState = 'GAME_OVER';
+      slider.disabled = true;
+      playSound('win');
+
+      const p1 = scores[1];
+      const p2 = scores[2];
+      const p2Label = gameMode === 'ai' ? 'Computer' : 'Player 2';
+
+      let title = 'It\'s a Draw!';
+      if (p1 > p2) title = 'Player 1 Wins!';
+      else if (p2 > p1) title = `${p2Label} Wins!`;
+
+      document.getElementById('winnerTitle').textContent = title;
+      document.getElementById('winnerSubtitle').textContent = `Final Score: ${p1} — ${p2}`;
+      document.getElementById('finalP1Score').textContent = p1;
+      document.getElementById('finalP2Score').textContent = p2;
+
+      const modal = document.getElementById('gameOverModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function spawnFloatingText(text, x, y, color) {
+      floatingTexts.push({ text, x, y, color, alpha: 1, dy: -1.2 });
+    }
+
+    /**************************************************************
+     * 12. RENDERING ENGINE (Minimal & Crisp 2D Canvas)
+     **************************************************************/
+    function drawBoard() {
+      const theme = THEMES[currentThemeKey];
+
+      // 1. Outer Wooden / Slate Frame
+      ctx.fillStyle = theme.frameOuter;
+      ctx.fillRect(0, 0, SIZE, SIZE);
+
+      // Inner Frame Bevel
+      ctx.fillStyle = theme.frameInner;
+      ctx.beginPath();
+      ctx.roundRect(10, 10, SIZE - 20, SIZE - 20, 26);
+      ctx.fill();
+
+      // 2. Playing Surface with subtle radial gradient
+      const grad = ctx.createRadialGradient(CENTER, CENTER, 40, CENTER, CENTER, SIZE * 0.65);
+      grad.addColorStop(0, theme.surface);
+      grad.addColorStop(1, theme.surfaceVignette);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.roundRect(PLAY_MIN, PLAY_MIN, PLAY_MAX - PLAY_MIN, PLAY_MAX - PLAY_MIN, 18);
+      ctx.fill();
+
+      // 3. Corner Pockets
+      for (const p of POCKETS) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, POCKET_RADIUS + 3, 0, Math.PI * 2);
+        ctx.fillStyle = theme.pocketRim;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, POCKET_RADIUS, 0, Math.PI * 2);
+        ctx.fillStyle = theme.pocketColor;
+        ctx.fill();
+      }
+
+      // 4. Center Rose & Concentric Circles
+      ctx.strokeStyle = theme.lineColor;
+      ctx.lineWidth = 1.8;
+
+      // Outer center ring
+      ctx.beginPath();
+      ctx.arc(CENTER, CENTER, 58, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Inner decorative ring
+      ctx.beginPath();
+      ctx.arc(CENTER, CENTER, 46, 0, Math.PI * 2);
+      ctx.setLineDash([6, 6]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Queen center spot
+      ctx.beginPath();
+      ctx.arc(CENTER, CENTER, DISC_RADIUS + 2, 0, Math.PI * 2);
+      ctx.strokeStyle = theme.accentRed;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(CENTER, CENTER, 5, 0, Math.PI * 2);
+      ctx.fillStyle = theme.accentRed;
+      ctx.fill();
+
+      // 5. Four Baselines (Top, Bottom, Left, Right)
+      drawBaselineHorizontal(BASELINE_Y_P1, currentPlayer === 1, theme);
+      drawBaselineHorizontal(BASELINE_Y_P2, currentPlayer === 2, theme);
+      drawBaselineVertical(BASELINE_Y_P2, theme);
+      drawBaselineVertical(BASELINE_Y_P1, theme);
+
+      // 6. Diagonal Foul / Guide Arrows toward pockets
+      ctx.strokeStyle = theme.lineColor;
+      ctx.globalAlpha = 0.45;
+      ctx.lineWidth = 1.5;
+      const diagOffsets = [
+        { sx: CENTER - 72, sy: CENTER - 72, ex: POCKET_OFFSET + 48, ey: POCKET_OFFSET + 48 },
+        { sx: CENTER + 72, sy: CENTER - 72, ex: SIZE - POCKET_OFFSET - 48, ey: POCKET_OFFSET + 48 },
+        { sx: CENTER - 72, sy: CENTER + 72, ex: POCKET_OFFSET + 48, ey: SIZE - POCKET_OFFSET - 48 },
+        { sx: CENTER + 72, sy: CENTER + 72, ex: SIZE - POCKET_OFFSET - 48, ey: SIZE - POCKET_OFFSET - 48 }
+      ];
+      for (const d of diagOffsets) {
+        ctx.beginPath();
+        ctx.moveTo(d.sx, d.sy);
+        ctx.lineTo(d.ex, d.ey);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function drawBaselineHorizontal(y, isActive, theme) {
+      const halfBand = BASELINE_CIRCLE_R;
+      ctx.strokeStyle = theme.lineColor;
+      ctx.lineWidth = isActive ? 2.2 : 1.5;
+      ctx.globalAlpha = isActive ? 0.95 : 0.55;
+
+      // Double baseline lines
+      ctx.beginPath();
+      ctx.moveTo(BASELINE_X_MIN, y - halfBand);
+      ctx.lineTo(BASELINE_X_MAX, y - halfBand);
+      ctx.moveTo(BASELINE_X_MIN, y + halfBand);
+      ctx.lineTo(BASELINE_X_MAX, y + halfBand);
+      ctx.stroke();
+
+      // End circles
+      [BASELINE_X_MIN, BASELINE_X_MAX].forEach(cx => {
+        ctx.beginPath();
+        ctx.arc(cx, y, halfBand, 0, Math.PI * 2);
+        ctx.fillStyle = theme.accentRed;
+        ctx.fill();
+        ctx.strokeStyle = theme.lineColor;
+        ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    function drawBaselineVertical(x, theme) {
+      const halfBand = BASELINE_CIRCLE_R;
+      ctx.strokeStyle = theme.lineColor;
+      ctx.lineWidth = 1.4;
+      ctx.globalAlpha = 0.4;
+
+      ctx.beginPath();
+      ctx.moveTo(x - halfBand, BASELINE_X_MIN);
+      ctx.lineTo(x - halfBand, BASELINE_X_MAX);
+      ctx.moveTo(x + halfBand, BASELINE_X_MIN);
+      ctx.lineTo(x + halfBand, BASELINE_X_MAX);
+      ctx.stroke();
+
+      [BASELINE_X_MIN, BASELINE_X_MAX].forEach(cy => {
+        ctx.beginPath();
+        ctx.arc(x, cy, halfBand * 0.75, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+      ctx.globalAlpha = 1;
+    }
+
+    function drawDisc(x, y, radius, type, alpha = 1) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      // Drop shadow
+      ctx.beginPath();
+      ctx.arc(x + 1.5, y + 2.5, radius, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+      ctx.fill();
+
+      // Main Disc Body
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+
+      if (type === 'white') {
+        ctx.fillStyle = '#f8fafc';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 0.58, 0, Math.PI * 2);
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      } else if (type === 'black') {
+        ctx.fillStyle = '#1e293b';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#475569';
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 0.58, 0, Math.PI * 2);
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      } else if (type === 'queen') {
+        ctx.fillStyle = '#e11d48';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#fda4af';
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 0.5, 0, Math.PI * 2);
+        ctx.strokeStyle = '#fecdd3';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      } else if (type === 'striker') {
+        const ringColor = currentPlayer === 1 ? '#38bdf8' : '#fb7185';
+        ctx.fillStyle = '#0f172a';
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = ringColor;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 0.42, 0, Math.PI * 2);
+        ctx.fillStyle = ringColor;
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
+    function drawAimingGuide() {
+      if (!isAiming || gameState !== 'AIMING') return;
+
+      const pullDx = striker.x - aimPullX;
+      const pullDy = striker.y - aimPullY;
+      const pullDist = Math.hypot(pullDx, pullDy);
+      if (pullDist < 12) return;
+
+      const clampedDist = Math.min(pullDist, MAX_DRAG_DIST);
+      const powerRatio = clampedDist / MAX_DRAG_DIST;
+      const dirX = pullDx / pullDist;
+      const dirY = pullDy / pullDist;
+
+      ctx.save();
+
+      // 1. Power Ring around Striker
+      const ringRadius = STRIKER_RADIUS + 8 + powerRatio * 22;
+      ctx.beginPath();
+      ctx.arc(striker.x, striker.y, ringRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = powerRatio > 0.75 ? '#f97316' : '#38bdf8';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([5, 5]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // 2. Pull-back handle indicator
+      const handleX = striker.x - dirX * clampedDist;
+      const handleY = striker.y - dirY * clampedDist;
+      ctx.beginPath();
+      ctx.moveTo(striker.x, striker.y);
+      ctx.lineTo(handleX, handleY);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(handleX, handleY, 7, 0, Math.PI * 2);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fill();
+
+      // 3. Forward Trajectory Line & Raycast Impact Preview
+      const maxRayLength = 160 + powerRatio * 290;
+      let hitDist = maxRayLength;
+      let hitDisc = null;
+
+      // Find closest disc intersection along aim ray
+      for (const d of discs) {
+        const toDiscX = d.x - striker.x;
+        const toDiscY = d.y - striker.y;
+        const proj = toDiscX * dirX + toDiscY * dirY;
+        if (proj > 0 && proj < hitDist) {
+          const perpSq = (toDiscX * toDiscX + toDiscY * toDiscY) - proj * proj;
+          const combinedR = STRIKER_RADIUS + d.radius;
+          if (perpSq < combinedR * combinedR) {
+            const impactDist = proj - Math.sqrt(combinedR * combinedR - perpSq);
+            if (impactDist > 0 && impactDist < hitDist) {
+              hitDist = impactDist;
+              hitDisc = d;
+            }
+          }
+        }
+      }
+
+      const endX = striker.x + dirX * hitDist;
+      const endY = striker.y + dirY * hitDist;
+
+      ctx.beginPath();
+      ctx.moveTo(striker.x, striker.y);
+      ctx.lineTo(endX, endY);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.2;
+      ctx.setLineDash([7, 7]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Draw ghost striker circle & target direction arrow on impact
+      if (hitDisc) {
+        ctx.beginPath();
+        ctx.arc(endX, endY, STRIKER_RADIUS, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.65)';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+
+        // Target disc deflection line
+        const normX = (hitDisc.x - endX) / (STRIKER_RADIUS + hitDisc.radius);
+        const normY = (hitDisc.y - endY) / (STRIKER_RADIUS + hitDisc.radius);
+        ctx.beginPath();
+        ctx.moveTo(hitDisc.x, hitDisc.y);
+        ctx.lineTo(hitDisc.x + normX * 65, hitDisc.y + normY * 65);
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function renderLoop() {
+      updatePhysics();
+
+      ctx.clearRect(0, 0, SIZE, SIZE);
+      drawBoard();
+
+      // Draw sinking pocket animations
+      for (let i = sinkingDiscs.length - 1; i >= 0; i--) {
+        const s = sinkingDiscs[i];
+        s.radius *= 0.88;
+        s.alpha -= 0.08;
+        if (s.alpha <= 0) {
+          sinkingDiscs.splice(i, 1);
+        } else {
+          drawDisc(s.x, s.y, s.radius, s.type, s.alpha);
+        }
+      }
+
+      // Draw all active board discs
+      for (const d of discs) {
+        drawDisc(d.x, d.y, d.radius, d.type);
+      }
+
+      // Draw aiming trajectory behind striker
+      drawAimingGuide();
+
+      // Draw Striker
+      if (striker.active) {
+        drawDisc(striker.x, striker.y, striker.radius, 'striker');
+      }
+
+      // Draw Floating Feedback Texts
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.y += ft.dy;
+        ft.alpha -= 0.022;
+        if (ft.alpha <= 0) {
+          floatingTexts.splice(i, 1);
+        } else {
+          ctx.save();
+          ctx.globalAlpha = ft.alpha;
+          ctx.font = '800 22px Inter, sans-serif';
+          ctx.fillStyle = ft.color;
+          ctx.textAlign = 'center';
+          ctx.shadowColor = 'rgba(0,0,0,0.7)';
+          ctx.shadowBlur = 8;
+          ctx.fillText(ft.text, ft.x, ft.y);
+          ctx.restore();
+        }
+      }
+
+      requestAnimationFrame(renderLoop);
+    }
+
+    window.onload = function () {
+      setupInitialRack();
+      placeStrikerForTurn(true);
+      requestAnimationFrame(renderLoop);
+    };
+  </script>
+</body>
+</html>
